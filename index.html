@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rayan Aslam — Portfolio</title>
+  <title>Rayan Aslam</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
@@ -11,199 +11,210 @@
 </head>
 <body>
 
-<!-- ============================================================
-     PRELOADER — Chapter 0
-     ============================================================ -->
+<!-- ═══════════════════════════════════════════════════════════
+     PRELOADER
+═══════════════════════════════════════════════════════════ -->
 <div id="preloader">
-  <div class="pre-canvas-wrap">
-    <canvas id="pre-canvas"></canvas>
-  </div>
-  <div class="pre-text">
-    <span class="pre-label" id="pre-label">Initializing System<span class="pre-dots"></span></span>
-    <div class="pre-bar-wrap"><div class="pre-bar" id="pre-bar"></div></div>
+  <canvas id="pre-canvas"></canvas>
+  <div class="pre-ui">
+    <span class="pre-mono" id="pre-label">Initializing System</span>
+    <div class="pre-bar-track"><div class="pre-bar" id="pre-bar"></div></div>
   </div>
 </div>
 
-<!-- ============================================================
-     MAIN SITE
-     ============================================================ -->
-<div id="site" style="opacity:0;">
+<!-- ═══════════════════════════════════════════════════════════
+     SINGLE FULLSCREEN SCENE
+═══════════════════════════════════════════════════════════ -->
+<div id="scene" style="opacity:0">
 
-  <!-- NAV -->
-  <nav id="nav">
-    <div class="nav-logo">RA</div>
-    <div class="nav-links">
-      <a href="#about" data-section="about">About</a>
-      <a href="#projects" data-section="projects">Projects</a>
-      <a href="#skills" data-section="skills">Skills</a>
-      <a href="#experience" data-section="experience">Experience</a>
-      <a href="#contact" data-section="contact">Contact</a>
-    </div>
-    <div class="nav-dot-cluster">
-      <span class="nav-dot" data-idx="0"></span>
-      <span class="nav-dot" data-idx="1"></span>
-      <span class="nav-dot" data-idx="2"></span>
-      <span class="nav-dot" data-idx="3"></span>
-      <span class="nav-dot" data-idx="4"></span>
-      <span class="nav-dot" data-idx="5"></span>
-    </div>
-  </nav>
+  <!-- Custom cursor -->
+  <div id="cursor"></div>
+  <div id="cursor-ring"></div>
 
-  <!-- ============ PERSISTENT 3D CANVAS ============ -->
+  <!-- THE ONLY CANVAS — this IS the entire experience -->
   <canvas id="main-canvas"></canvas>
 
-  <!-- ============ SCROLL CONTAINER ============ -->
-  <div id="scroll-container">
+  <!-- ── FACE CONTENT LAYER ──────────────────────────────────
+       All content is absolutely positioned and maps to
+       the cube face in screen space. It is NEVER a sidebar,
+       overlay page, or scroll section.
+  ──────────────────────────────────────────────────────────── -->
+  <div id="face-content" class="face-content">
 
-    <!-- ── CHAPTER 1 · HERO ────────────────────────────────── -->
-    <section class="chapter" id="ch-hero" data-chapter="0">
-      <div class="hero-ui">
+    <!-- FACE 0 — HERO (minimal, cube only) -->
+    <div class="face" id="face-0">
+      <div class="face-hero">
         <div class="hero-eyebrow">Software Engineer · AI · Builder</div>
-        <h1 class="hero-name">
-          <span class="hero-line" data-split>Rayan</span>
-          <span class="hero-line" data-split>Aslam</span>
-        </h1>
-        <p class="hero-sub">Computer Science · Rutgers University</p>
-        <div class="scroll-hint">
-          <span class="scroll-hint-line"></span>
-          <span class="scroll-hint-text">Scroll to Explore</span>
+        <h1 class="hero-name">Rayan<br/>Aslam</h1>
+        <p class="hero-school">Computer Science · Rutgers University</p>
+        <div class="hero-hint">
+          <span class="hint-key">SCROLL</span>
+          <span class="hint-sep">·</span>
+          <span class="hint-label">Begin</span>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- ── CHAPTER 2 · ABOUT FACE ─────────────────────────── -->
-    <section class="chapter" id="ch-about" data-chapter="1">
-      <div class="about-ui">
-        <div class="about-header">
-          <div class="section-label">Chapter 02 · Identity</div>
-          <h2 class="section-title">About Face</h2>
-          <p class="section-sub">Hover each tile to reveal the layers.</p>
+    <!-- FACE 1 — ABOUT (3×3 identity grid) -->
+    <div class="face" id="face-1">
+      <div class="face-label">02 · Identity</div>
+      <div class="face-title">About</div>
+      <div class="identity-grid">
+        <div class="id-tile" data-color="blue">
+          <div class="id-tile-top">Rutgers</div>
+          <div class="id-tile-body">CS student at Rutgers University building at the intersection of systems, AI, and craft.</div>
         </div>
-        <!-- 3x3 grid rendered as HTML overlay, synced to cube face -->
-        <div class="tile-grid" id="tile-grid">
-          <div class="tile" data-tile="0" data-title="Rutgers" data-desc="Computer Science student at Rutgers University, building at the intersection of systems, AI, and design.">
-            <div class="tile-face"><span>Rutgers</span></div>
-            <div class="tile-back"><strong>Rutgers University</strong><p>Computer Science student building at the intersection of systems, AI, and design.</p></div>
-          </div>
-          <div class="tile" data-tile="1" data-title="AI / ML" data-desc="Researching applied intelligent systems — from language models to computer vision pipelines.">
-            <div class="tile-face"><span>AI / ML</span></div>
-            <div class="tile-back"><strong>AI Research</strong><p>Working on applied intelligent systems — language models, computer vision, and data pipelines.</p></div>
-          </div>
-          <div class="tile" data-tile="2" data-title="Research" data-desc="Contributing to academic and industry research on real-world intelligent system applications.">
-            <div class="tile-face"><span>Research</span></div>
-            <div class="tile-back"><strong>Research</strong><p>Contributing to academic and industry work on real-world intelligent system applications.</p></div>
-          </div>
-          <div class="tile" data-tile="3" data-title="Builder" data-desc="I ship. From weekend hackathons to production systems — building things that work is the mission.">
-            <div class="tile-face"><span>Builder</span></div>
-            <div class="tile-back"><strong>Builder</strong><p>From weekend hackathons to production systems — building things that work is the mission.</p></div>
-          </div>
-          <div class="tile tile-center" data-tile="4" data-title="Me" data-desc="Engineer who thinks in systems. Curious, fast, always iterating.">
-            <div class="tile-face"><span>Me</span></div>
-            <div class="tile-back"><strong>Rayan Aslam</strong><p>Engineer who thinks in systems. Curious, fast, always iterating.</p></div>
-          </div>
-          <div class="tile" data-tile="5" data-title="Leadership" data-desc="Led teams across engineering and organizations — managing people, projects, and priorities.">
-            <div class="tile-face"><span>Leadership</span></div>
-            <div class="tile-back"><strong>Leadership</strong><p>Led teams across engineering and organizations — managing people, projects, and priorities.</p></div>
-          </div>
-          <div class="tile" data-tile="6" data-title="Design" data-desc="Care deeply about the craft — interfaces should feel as good as they work.">
-            <div class="tile-face"><span>Design</span></div>
-            <div class="tile-back"><strong>Design</strong><p>Care deeply about craft — interfaces should feel as good as they function.</p></div>
-          </div>
-          <div class="tile" data-tile="7" data-title="Data" data-desc="Comfortable moving through data at every layer — from raw ingestion to insight delivery.">
-            <div class="tile-face"><span>Data</span></div>
-            <div class="tile-back"><strong>Data</strong><p>Comfortable at every layer — from raw ingestion to insight delivery and visualization.</p></div>
-          </div>
-          <div class="tile" data-tile="8" data-title="Problem Solving" data-desc="Complicated problems are the point. Breaking them down is the craft.">
-            <div class="tile-face"><span>Problems</span></div>
-            <div class="tile-back"><strong>Problem Solving</strong><p>Complicated problems are the point. Breaking them into tractable pieces is the craft.</p></div>
-          </div>
+        <div class="id-tile" data-color="orange">
+          <div class="id-tile-top">AI / ML</div>
+          <div class="id-tile-body">Applied intelligent systems — language models, vision pipelines, research engineering.</div>
+        </div>
+        <div class="id-tile" data-color="yellow">
+          <div class="id-tile-top">Research</div>
+          <div class="id-tile-body">Contributing to academic and industry research on real-world AI applications.</div>
+        </div>
+        <div class="id-tile" data-color="green">
+          <div class="id-tile-top">Builder</div>
+          <div class="id-tile-body">From weekend hackathons to production systems — shipping things that work is the mission.</div>
+        </div>
+        <div class="id-tile id-tile-center" data-color="white">
+          <div class="id-tile-top">Me</div>
+          <div class="id-tile-body">Engineer who thinks in systems. Curious, fast, always iterating.</div>
+        </div>
+        <div class="id-tile" data-color="red">
+          <div class="id-tile-top">Lead</div>
+          <div class="id-tile-body">Led teams across engineering and organizations — people, projects, priorities.</div>
+        </div>
+        <div class="id-tile" data-color="blue">
+          <div class="id-tile-top">Design</div>
+          <div class="id-tile-body">Care deeply about craft — interfaces should feel as good as they function.</div>
+        </div>
+        <div class="id-tile" data-color="green">
+          <div class="id-tile-top">Data</div>
+          <div class="id-tile-body">Every layer — from raw ingestion to insight delivery and visualization.</div>
+        </div>
+        <div class="id-tile" data-color="orange">
+          <div class="id-tile-top">Problems</div>
+          <div class="id-tile-body">Complicated problems are the point. Breaking them apart is the craft.</div>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- ── CHAPTER 3 · PROJECTS MATRIX ───────────────────── -->
-    <section class="chapter chapter-tall" id="ch-projects" data-chapter="2">
-      <div class="projects-ui">
-        <div class="section-label">Chapter 03 · Work</div>
-        <h2 class="section-title">Project Matrix</h2>
-        <p class="section-sub">Click any module to explore.</p>
-        <div class="project-grid" id="project-grid">
-          <!-- Cards populated by JS from contentConfig -->
+    <!-- FACE 2 — PROJECTS -->
+    <div class="face" id="face-2">
+      <div class="face-label">03 · Work</div>
+      <div class="face-title">Projects</div>
+      <div class="project-modules" id="project-modules">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+    <!-- FACE 3 — SKILLS -->
+    <div class="face" id="face-3">
+      <div class="face-label">04 · Capability</div>
+      <div class="face-title">Architecture</div>
+      <div class="skill-layout">
+        <div class="skill-axis-block" data-axis="frontend">
+          <div class="axis-header" style="color:#2979F2">Frontend</div>
+          <div class="axis-nodes" id="skill-frontend"></div>
+        </div>
+        <div class="skill-divider"></div>
+        <div class="skill-axis-block" data-axis="ai">
+          <div class="axis-header" style="color:#2DBB6B">AI / Data</div>
+          <div class="axis-nodes" id="skill-ai"></div>
+        </div>
+        <div class="skill-divider"></div>
+        <div class="skill-axis-block" data-axis="backend">
+          <div class="axis-header" style="color:#F06B20">Backend</div>
+          <div class="axis-nodes" id="skill-backend"></div>
         </div>
       </div>
+    </div>
 
-      <!-- Project Modal -->
-      <div class="project-modal" id="project-modal">
-        <div class="modal-inner">
-          <button class="modal-close" id="modal-close">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-          <div class="modal-content" id="modal-content"></div>
-        </div>
+    <!-- FACE 4 — EXPERIENCE -->
+    <div class="face" id="face-4">
+      <div class="face-label">05 · Timeline</div>
+      <div class="face-title">Experience</div>
+      <div class="timeline-modules" id="timeline-modules">
+        <!-- populated by JS -->
       </div>
-    </section>
+    </div>
 
-    <!-- ── CHAPTER 4 · SKILL ARCHITECTURE ────────────────── -->
-    <section class="chapter" id="ch-skills" data-chapter="3">
-      <div class="skills-ui">
-        <div class="section-label">Chapter 04 · Capability</div>
-        <h2 class="section-title">Skill Architecture</h2>
-        <p class="section-sub">Three axes. One system.</p>
-        <div class="skill-axes">
-          <div class="axis-label axis-x">Frontend</div>
-          <div class="axis-label axis-y">AI / Data</div>
-          <div class="axis-label axis-z">Backend</div>
-        </div>
-        <div class="skill-constellation" id="skill-constellation">
-          <!-- Nodes rendered by JS -->
-        </div>
-        <div class="skill-tooltip" id="skill-tooltip"></div>
+    <!-- FACE 5 — CONTACT / FINAL SOLVE -->
+    <div class="face" id="face-5">
+      <div class="face-label">06 · Resolution</div>
+      <div class="contact-headline">Building systems<br/>from complexity.</div>
+      <div class="contact-sub">The cube is solved. Let's build something.</div>
+      <div class="contact-cta-row" id="contact-cta-row">
+        <!-- populated by JS -->
       </div>
-    </section>
+      <form class="contact-form" id="contact-form">
+        <div class="cf-row">
+          <input class="cf-input" type="text" placeholder="Your name" required />
+          <input class="cf-input" type="email" placeholder="Your email" required />
+        </div>
+        <textarea class="cf-input cf-textarea" placeholder="What are you building?" rows="3" required></textarea>
+        <button class="cf-submit" type="submit">Send <span>→</span></button>
+      </form>
+    </div>
 
-    <!-- ── CHAPTER 5 · EXPERIENCE ENGINE ─────────────────── -->
-    <section class="chapter chapter-tall" id="ch-experience" data-chapter="4">
-      <div class="exp-ui">
-        <div class="section-label">Chapter 05 · Timeline</div>
-        <h2 class="section-title">Experience Engine</h2>
-        <div class="exp-timeline" id="exp-timeline">
-          <!-- Entries rendered by JS -->
-        </div>
-      </div>
-    </section>
+  </div><!-- /face-content -->
 
-    <!-- ── CHAPTER 6 · FINAL SOLVE / CONTACT ─────────────── -->
-    <section class="chapter" id="ch-contact" data-chapter="5">
-      <div class="contact-ui">
-        <div class="section-label">Chapter 06 · Resolution</div>
-        <div class="contact-resolve-text">
-          <h2 class="contact-headline">Building systems<br/>from complexity.</h2>
-          <p class="contact-sub">The cube is solved. Let's build something together.</p>
-        </div>
-        <div class="contact-cta" id="contact-cta">
-          <!-- Populated by JS -->
-        </div>
-        <div class="contact-form-wrap">
-          <form class="contact-form" id="contact-form">
-            <div class="form-row">
-              <input type="text" placeholder="Your name" class="form-input" required />
-              <input type="email" placeholder="Your email" class="form-input" required />
-            </div>
-            <textarea placeholder="What are you building?" class="form-input form-textarea" rows="4" required></textarea>
-            <button type="submit" class="form-submit">Send Message <span class="btn-arrow">→</span></button>
-          </form>
-        </div>
-        <div class="contact-footer">
-          <span>Rayan Aslam · Marlton, NJ</span>
-          <span>rra98@scarletmail.rutgers.edu</span>
-        </div>
-      </div>
-    </section>
+  <!-- ── CHROME LAYER — chapter indicator, nav arrows ───────── -->
+  <div id="chrome">
 
-  </div><!-- /scroll-container -->
-</div><!-- /site -->
+    <!-- Chapter number indicator -->
+    <div id="chapter-indicator">
+      <span class="ch-num" id="ch-current">01</span>
+      <span class="ch-sep">/</span>
+      <span class="ch-num ch-total" style="opacity:.4">06</span>
+    </div>
 
-<!-- THREE.JS + GSAP + SCROLLTRIGGER -->
+    <!-- Progress dots -->
+    <div id="progress-dots">
+      <div class="pdot" data-idx="0"></div>
+      <div class="pdot" data-idx="1"></div>
+      <div class="pdot" data-idx="2"></div>
+      <div class="pdot" data-idx="3"></div>
+      <div class="pdot" data-idx="4"></div>
+      <div class="pdot" data-idx="5"></div>
+    </div>
+
+    <!-- Navigation arrows -->
+    <button class="nav-arrow" id="nav-prev" aria-label="Previous face">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="15,18 9,12 15,6"/></svg>
+    </button>
+    <button class="nav-arrow" id="nav-next" aria-label="Next face">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="9,6 15,12 9,18"/></svg>
+    </button>
+
+    <!-- Face name tag -->
+    <div id="face-tag">
+      <span class="face-tag-label" id="face-tag-text">Hero</span>
+    </div>
+
+    <!-- Corner signature -->
+    <div id="corner-sig">RA</div>
+
+  </div><!-- /chrome -->
+
+  <!-- Project modal -->
+  <div id="project-modal" class="modal">
+    <div class="modal-box">
+      <button class="modal-close" id="modal-close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Transition blocker -->
+  <div id="transition-blocker"></div>
+
+</div><!-- /scene -->
+
+<!-- LIBS -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/CustomEase.min.js"></script>
 <script type="importmap">
 {
   "imports": {
@@ -212,9 +223,6 @@
   }
 }
 </script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-
 <script type="module" src="./app.js"></script>
 <script data-pplx-inline-edit>
 (function () {

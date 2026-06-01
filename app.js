@@ -1,242 +1,129 @@
 /**
- * CUBE PORTFOLIO — Main Application
- * Three.js + GSAP ScrollTrigger driven cinematic portfolio
- * ================================================================
- * CONTENT CONFIG — Fill in your own data here
- * ================================================================
+ * ══════════════════════════════════════════════════════════════
+ *  CUBE PORTFOLIO v2 — FACE-AS-INTERFACE STATE MACHINE
+ *  Architecture: Discrete chapter system. The cube IS the UI.
+ *  No scrolling overlay. No background decoration.
+ *  Each face = one chapter. Content lives ON the cube surface.
+ * ══════════════════════════════════════════════════════════════
+ *
+ *  STATE MACHINE FLOW:
+ *  IDLE → [scroll] → HIDE_CONTENT → ROTATE → LOCK → PAUSE → REVEAL → IDLE
  */
-const contentConfig = {
-  hero: {
-    name: ['Rayan', 'Aslam'],
-    eyebrow: 'Software Engineer · AI · Builder',
-    sub: 'Computer Science · Rutgers University',
-  },
 
-  showcaseModules: [
-    {
-      id: 'p1',
-      title: 'Portfolio',
-      tags: ['Three.js', 'GSAP', 'WebGL'],
-      desc: 'This interactive 3D portfolio — a living Rubik\'s cube as a storytelling device.',
-      problem: 'How do you stand out in a sea of static resume sites?',
-      solution: 'A scroll-driven 3D narrative experience that doubles as a technical showcase.',
-      github: '#',
-      demo: '#',
-      color: '#2979F2',
-    },
-    {
-      id: 'p2',
-      title: 'AI Research',
-      tags: ['Python', 'PyTorch', 'NLP'],
-      desc: 'Applied ML research on intelligent system pipelines.',
-      problem: 'Placeholder — describe your research problem here.',
-      solution: 'Placeholder — describe your approach and results.',
-      github: '#',
-      demo: null,
-      color: '#2DBB6B',
-    },
-    {
-      id: 'p3',
-      title: 'Startup Project',
-      tags: ['React', 'FastAPI', 'PostgreSQL'],
-      desc: 'Full-stack product built from zero to launch.',
-      problem: 'Placeholder — describe the user problem you solved.',
-      solution: 'Placeholder — describe the system and outcome.',
-      github: '#',
-      demo: '#',
-      color: '#F5C842',
-    },
-    {
-      id: 'p4',
-      title: 'Web Application',
-      tags: ['Next.js', 'TypeScript', 'Prisma'],
-      desc: 'Production web app with real-time features.',
-      problem: 'Placeholder — add your project description.',
-      solution: 'Placeholder — add architecture details.',
-      github: '#',
-      demo: '#',
-      color: '#E8293A',
-    },
-    {
-      id: 'p5',
-      title: 'Data Viz',
-      tags: ['D3.js', 'Python', 'Pandas'],
-      desc: 'Interactive data visualization dashboard.',
-      problem: 'Placeholder — add your project description.',
-      solution: 'Placeholder — add architecture details.',
-      github: '#',
-      demo: '#',
-      color: '#F06B20',
-    },
-    {
-      id: 'p6',
-      title: 'Hackathon',
-      tags: ['React', 'Node.js', 'API'],
-      desc: '24-hour build — shipped a complete product.',
-      problem: 'Placeholder — add your hackathon challenge.',
-      solution: 'Placeholder — add what you built.',
-      github: '#',
-      demo: '#',
-      color: '#4F98A3',
-    },
-    {
-      id: 'p7',
-      title: 'Automation',
-      tags: ['Python', 'Selenium', 'AWS'],
-      desc: 'Workflow automation reducing manual overhead.',
-      problem: 'Placeholder — describe the automation challenge.',
-      solution: 'Placeholder — describe what you automated.',
-      github: '#',
-      demo: null,
-      color: '#2979F2',
-    },
-    {
-      id: 'p8',
-      title: 'ML Tool',
-      tags: ['PyTorch', 'ONNX', 'FastAPI'],
-      desc: 'Production ML inference pipeline.',
-      problem: 'Placeholder — describe your ML problem.',
-      solution: 'Placeholder — describe the model and deployment.',
-      github: '#',
-      demo: '#',
-      color: '#2DBB6B',
-    },
-    {
-      id: 'p9',
-      title: 'Open Source',
-      tags: ['TypeScript', 'CLI', 'npm'],
-      desc: 'Open source tool used by the community.',
-      problem: 'Placeholder — describe the open source need.',
-      solution: 'Placeholder — describe your contribution.',
-      github: '#',
-      demo: null,
-      color: '#E8293A',
-    },
-  ],
-
-  capabilityNodes: [
-    // Frontend
-    { label: 'React',       axis: 'frontend', x: 12, y: 18,  exp: '3 years · production systems' },
-    { label: 'TypeScript',  axis: 'frontend', x: 22, y: 30,  exp: 'Type-safe full-stack' },
-    { label: 'Next.js',     axis: 'frontend', x: 8,  y: 42,  exp: 'SSR / SSG · production' },
-    { label: 'Three.js',    axis: 'frontend', x: 18, y: 55,  exp: 'WebGL · 3D experiences' },
-    { label: 'CSS / GSAP',  axis: 'frontend', x: 6,  y: 68,  exp: 'Motion · design systems' },
-    // AI / Data
-    { label: 'PyTorch',     axis: 'ai',       x: 45, y: 12,  exp: 'Deep learning · research' },
-    { label: 'Python',      axis: 'ai',       x: 55, y: 28,  exp: 'Primary language · ML' },
-    { label: 'Pandas / NumPy', axis: 'ai',    x: 48, y: 45,  exp: 'Data pipelines · analysis' },
-    { label: 'Transformers',axis: 'ai',       x: 60, y: 20,  exp: 'NLP · LLM fine-tuning' },
-    { label: 'Scikit-Learn',axis: 'ai',       x: 52, y: 62,  exp: 'Classical ML · modeling' },
-    // Backend
-    { label: 'FastAPI',     axis: 'backend',  x: 82, y: 20,  exp: 'REST APIs · async' },
-    { label: 'Node.js',     axis: 'backend',  x: 88, y: 38,  exp: 'Event-driven systems' },
-    { label: 'PostgreSQL',  axis: 'backend',  x: 78, y: 55,  exp: 'Relational DB · design' },
-    { label: 'AWS',         axis: 'backend',  x: 91, y: 68,  exp: 'Cloud · serverless' },
-    { label: 'Docker',      axis: 'backend',  x: 72, y: 38,  exp: 'Containers · deployment' },
-  ],
-
-  timelineEntries: [
-    {
-      date: '2024 — Present',
-      role: 'Software Engineering Intern',
-      org: 'Placeholder Company',
-      desc: 'Placeholder — describe your role, team, and impact. What systems did you build? What problems did you solve?',
-      tags: ['React', 'Python', 'AWS'],
-    },
-    {
-      date: '2023 — 2024',
-      role: 'AI Research Assistant',
-      org: 'Rutgers University',
-      desc: 'Placeholder — describe your research project, methods, and contributions. Include any publications or presentations.',
-      tags: ['PyTorch', 'NLP', 'Research'],
-    },
-    {
-      date: '2023',
-      role: 'Full-Stack Developer',
-      org: 'Freelance / Independent',
-      desc: 'Placeholder — describe freelance or independent projects. What did you build for whom?',
-      tags: ['React', 'Node.js', 'PostgreSQL'],
-    },
-    {
-      date: '2022 — 2023',
-      role: 'Technical Lead',
-      org: 'Student Organization',
-      desc: 'Placeholder — describe your leadership role. How many people? What did you ship?',
-      tags: ['Leadership', 'Full-Stack', 'Mentorship'],
-    },
-    {
-      date: '2021 — Present',
-      role: 'B.S. Computer Science',
-      org: 'Rutgers University',
-      desc: 'Relevant coursework: Data Structures, Algorithms, Machine Learning, Systems Programming, Computer Architecture, Software Engineering.',
-      tags: ['CS', 'AI/ML', 'Systems'],
-    },
-  ],
-
-  contactActions: [
-    { label: 'GitHub',   href: 'https://github.com/',   icon: '⬡', primary: false },
-    { label: 'LinkedIn', href: 'https://linkedin.com/',  icon: '⬡', primary: false },
-    { label: 'Resume',   href: '#',                       icon: '⬡', primary: true  },
-    { label: 'Email',    href: 'mailto:rra98@scarletmail.rutgers.edu', icon: '⬡', primary: false },
-  ],
-};
-
-/* ================================================================
-   IMPORTS
-   ================================================================ */
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 
-/* ================================================================
-   GLOBALS
-   ================================================================ */
 const gsap = window.gsap;
-const ScrollTrigger = window.ScrollTrigger;
-gsap.registerPlugin(ScrollTrigger);
 
-let scene, camera, renderer, composer;
-let cubeGroup, cubeModel;
-let clock = new THREE.Clock();
-let mouse = { x: 0, y: 0, nx: 0, ny: 0 };
-let currentChapter = 0;
+/* ══════════════════════════════════════════════════════════════
+   CONTENT CONFIG — Fill in your own data
+   ══════════════════════════════════════════════════════════════ */
+const CONFIG = {
 
-/* Cube face colors for procedural cube */
-const FACE_COLORS = [0xE8293A, 0xF06B20, 0xF5C842, 0x2DBB6B, 0x2979F2, 0xE8E8E0];
+  faces: ['Hero', 'About', 'Projects', 'Skills', 'Experience', 'Contact'],
 
-/* ================================================================
+  projects: [
+    { title: 'Portfolio',    tags: ['Three.js','GSAP','WebGL'],          color: '#2979F2', problem: 'How do you stand out in a sea of static resume sites?',           solution: 'A face-based 3D narrative — the cube IS the interface.' },
+    { title: 'AI Research',  tags: ['Python','PyTorch','NLP'],            color: '#2DBB6B', problem: 'Placeholder — describe your research problem.',                   solution: 'Placeholder — describe your approach and results.' },
+    { title: 'Startup',      tags: ['React','FastAPI','PostgreSQL'],      color: '#F5C842', problem: 'Placeholder — describe the user problem you solved.',             solution: 'Placeholder — describe the system and outcome.' },
+    { title: 'Web App',      tags: ['Next.js','TypeScript','Prisma'],     color: '#E8293A', problem: 'Placeholder — add your project description.',                    solution: 'Placeholder — add architecture details.' },
+    { title: 'Data Viz',     tags: ['D3.js','Python','Pandas'],           color: '#F06B20', problem: 'Placeholder — add your project description.',                    solution: 'Placeholder — add architecture details.' },
+    { title: 'Hackathon',    tags: ['React','Node.js','API'],             color: '#4F98A3', problem: 'Placeholder — add your hackathon challenge.',                    solution: 'Placeholder — add what you built.' },
+    { title: 'Automation',   tags: ['Python','Selenium','AWS'],           color: '#2979F2', problem: 'Placeholder — describe the automation challenge.',               solution: 'Placeholder — describe what you automated.' },
+    { title: 'ML Tool',      tags: ['PyTorch','ONNX','FastAPI'],          color: '#2DBB6B', problem: 'Placeholder — describe your ML problem.',                        solution: 'Placeholder — describe the model and deployment.' },
+    { title: 'Open Source',  tags: ['TypeScript','CLI','npm'],            color: '#E8293A', problem: 'Placeholder — describe the open source need.',                   solution: 'Placeholder — describe your contribution.' },
+  ],
+
+  skills: {
+    frontend: ['React', 'TypeScript', 'Next.js', 'Three.js', 'CSS / GSAP'],
+    ai:       ['PyTorch', 'Python', 'Pandas', 'Transformers', 'Scikit-Learn'],
+    backend:  ['FastAPI', 'Node.js', 'PostgreSQL', 'AWS', 'Docker'],
+  },
+
+  experience: [
+    { date: '2024 — Present', role: 'Software Engineering Intern', org: 'Placeholder Company',    desc: 'Placeholder — describe your role, team, and impact. What systems did you build?', tags: ['React','Python','AWS'] },
+    { date: '2023 — 2024',   role: 'AI Research Assistant',       org: 'Rutgers University',      desc: 'Placeholder — describe your research project, methods, and contributions.',        tags: ['PyTorch','NLP','Research'] },
+    { date: '2023',           role: 'Full-Stack Developer',         org: 'Freelance',               desc: 'Placeholder — describe freelance or independent projects you shipped.',            tags: ['React','Node.js','PostgreSQL'] },
+    { date: '2022 — 2023',   role: 'Technical Lead',               org: 'Student Organization',   desc: 'Placeholder — describe your leadership role. How many people? What did you ship?', tags: ['Leadership','Full-Stack'] },
+    { date: '2021 — Present', role: 'B.S. Computer Science',        org: 'Rutgers University',      desc: 'Coursework: Data Structures, Algorithms, ML, Systems, Computer Architecture.',    tags: ['CS','AI/ML','Systems'] },
+  ],
+
+  contact: [
+    { label: 'GitHub',   href: 'https://github.com/',                          primary: false },
+    { label: 'LinkedIn', href: 'https://linkedin.com/',                         primary: false },
+    { label: 'Resume',   href: '#',                                              primary: true  },
+    { label: 'Email',    href: 'mailto:rra98@scarletmail.rutgers.edu',           primary: false },
+  ],
+};
+
+/* ══════════════════════════════════════════════════════════════
+   FACE ROTATION MAP
+   Defines the THREE.Euler target rotation for each face index,
+   and the rotation axis/direction for the transition tween.
+   The cube always shows face 0 (front face, +Z) toward camera.
+   We rotate the group so the correct face faces +Z.
+   ══════════════════════════════════════════════════════════════ */
+const FACE_ROTATIONS = [
+  { euler: [0, 0, 0],                    label: 'Hero'       }, // front face
+  { euler: [0, -Math.PI / 2, 0],         label: 'About'      }, // right face → front
+  { euler: [0, -Math.PI, 0],             label: 'Projects'   }, // back face  → front
+  { euler: [0,  Math.PI / 2, 0],         label: 'Skills'     }, // left face  → front
+  { euler: [-Math.PI / 2, 0, 0],         label: 'Experience' }, // top face   → front
+  { euler: [ Math.PI / 2, 0, 0],         label: 'Contact'    }, // bottom face→ front
+];
+
+/* ══════════════════════════════════════════════════════════════
+   STATE MACHINE
+   ══════════════════════════════════════════════════════════════ */
+const State = {
+  IDLE:         'IDLE',
+  HIDE_CONTENT: 'HIDE_CONTENT',
+  ROTATE:       'ROTATE',
+  LOCK:         'LOCK',
+  PAUSE:        'PAUSE',
+  REVEAL:       'REVEAL',
+};
+let currentState  = State.IDLE;
+let currentFaceIdx = 0;
+let isTransitioning = false;
+
+/* ══════════════════════════════════════════════════════════════
+   THREE.JS SCENE GLOBALS
+   ══════════════════════════════════════════════════════════════ */
+let renderer, scene, camera;
+let cubeGroup;
+let clock;
+let mouseTarget = { x: 0, y: 0 };
+let mouseSmooth = { x: 0, y: 0 };
+
+/* ══════════════════════════════════════════════════════════════
    CURSOR
-   ================================================================ */
+   ══════════════════════════════════════════════════════════════ */
 function initCursor() {
-  const dot  = document.createElement('div'); dot.id  = 'cursor';
-  const ring = document.createElement('div'); ring.id = 'cursor-ring';
-  document.body.appendChild(dot);
-  document.body.appendChild(ring);
-
-  let mx = -100, my = -100;
-  let rx = -100, ry = -100;
+  const dot  = document.getElementById('cursor');
+  const ring = document.getElementById('cursor-ring');
+  let mx = -100, my = -100, rx = -100, ry = -100;
 
   document.addEventListener('mousemove', e => {
     mx = e.clientX; my = e.clientY;
-    mouse.nx = (e.clientX / window.innerWidth)  * 2 - 1;
-    mouse.ny = (e.clientY / window.innerHeight) * 2 - 1;
+    mouseTarget.x = (e.clientX / window.innerWidth)  * 2 - 1;
+    mouseTarget.y = (e.clientY / window.innerHeight) * 2 - 1;
   });
 
-  const interactables = 'a, button, .tile, .project-card, .skill-node, .cta-btn, .modal-link, .form-submit';
+  const hoverSels = 'button, a, .id-tile, .proj-module, .skill-chip, .cta-link, .pdot';
   document.addEventListener('mouseover', e => {
-    if (e.target.closest(interactables)) document.body.classList.add('hovering');
+    if (e.target.closest(hoverSels)) document.body.classList.add('hovering');
   });
   document.addEventListener('mouseout', e => {
-    if (e.target.closest(interactables)) document.body.classList.remove('hovering');
+    if (e.target.closest(hoverSels)) document.body.classList.remove('hovering');
   });
 
   function loop() {
-    // dot: fast
     dot.style.left = mx + 'px';
     dot.style.top  = my + 'px';
-    // ring: lagged
-    rx += (mx - rx) * 0.12;
-    ry += (my - ry) * 0.12;
+    rx += (mx - rx) * 0.1;
+    ry += (my - ry) * 0.1;
     ring.style.left = rx + 'px';
     ring.style.top  = ry + 'px';
     requestAnimationFrame(loop);
@@ -244,786 +131,785 @@ function initCursor() {
   loop();
 }
 
-/* ================================================================
-   PARTICLE CANVAS
-   ================================================================ */
-function initParticles() {
-  const canvas = document.createElement('canvas');
-  canvas.id = 'particle-canvas';
-  document.body.prepend(canvas);
-  const ctx = canvas.getContext('2d');
-
-  const particles = [];
-  const N = window.innerWidth < 768 ? 40 : 80;
-
-  function resize() {
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  for (let i = 0; i < N; i++) {
-    particles.push({
-      x: Math.random() * window.innerWidth,
-      y: Math.random() * window.innerHeight,
-      r: Math.random() * 1.2 + 0.3,
-      vx: (Math.random() - 0.5) * 0.2,
-      vy: (Math.random() - 0.5) * 0.2,
-      a: Math.random() * 0.6 + 0.1,
-    });
-  }
-
-  function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    particles.forEach(p => {
-      p.x += p.vx; p.y += p.vy;
-      if (p.x < 0) p.x = canvas.width;
-      if (p.x > canvas.width) p.x = 0;
-      if (p.y < 0) p.y = canvas.height;
-      if (p.y > canvas.height) p.y = 0;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(79,152,163,${p.a})`;
-      ctx.fill();
-    });
-    requestAnimationFrame(draw);
-  }
-  draw();
-}
-
-/* ================================================================
-   PRELOADER — Procedural mini cube
-   ================================================================ */
-function runPreloader(onComplete) {
-  const canvas = document.getElementById('pre-canvas');
-  const w = 180, h = 180;
-  canvas.width = w; canvas.height = h;
-  const ctx = canvas.getContext('2d');
-
-  let angle = 0;
-  let scale = 0;
-  let progress = 0;
-  let done = false;
-  const bar = document.getElementById('pre-bar');
-
-  // Draw a simple isometric cube proxy
-  function drawCube(s, a) {
-    ctx.clearRect(0, 0, w, h);
-    const cx = w / 2, cy = h / 2;
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(a);
-    ctx.scale(s, s);
-
-    // Face top
-    ctx.beginPath();
-    const top = [[-40, -20], [0, -40], [40, -20], [0, 0]];
-    ctx.moveTo(...top[0]);
-    top.forEach(p => ctx.lineTo(...p));
-    ctx.closePath();
-    ctx.fillStyle = '#2979F2';
-    ctx.fill();
-
-    // Face left
-    ctx.beginPath();
-    const left = [[-40, -20], [0, 0], [0, 40], [-40, 20]];
-    ctx.moveTo(...left[0]);
-    left.forEach(p => ctx.lineTo(...p));
-    ctx.closePath();
-    ctx.fillStyle = '#2DBB6B';
-    ctx.fill();
-
-    // Face right
-    ctx.beginPath();
-    const right = [[0, 0], [40, -20], [40, 20], [0, 40]];
-    ctx.moveTo(...right[0]);
-    right.forEach(p => ctx.lineTo(...p));
-    ctx.closePath();
-    ctx.fillStyle = '#E8293A';
-    ctx.fill();
-
-    // edges
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-    ctx.lineWidth = 0.5;
-    ctx.beginPath(); ctx.moveTo(-40,-20); ctx.lineTo(0,-40); ctx.lineTo(40,-20); ctx.lineTo(0,0); ctx.closePath(); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-40,20); ctx.lineTo(0,40); ctx.lineTo(40,20); ctx.closePath(); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(0,-40); ctx.lineTo(0,0); ctx.moveTo(-40,-20); ctx.lineTo(-40,20); ctx.moveTo(40,-20); ctx.lineTo(40,20); ctx.stroke();
-
-    ctx.restore();
-  }
-
-  // Allow skip on click or keypress
-  function skipPreloader() {
-    if (done) return;
-    done = true;
-    bar.style.width = '100%';
-    setTimeout(() => {
-      gsap.to('#preloader', {
-        opacity: 0, duration: 0.5, ease: 'power2.inOut',
-        onComplete: () => {
-          document.getElementById('preloader').style.display = 'none';
-          onComplete();
-        }
-      });
-    }, 150);
-  }
-  canvas.parentElement.addEventListener('click', skipPreloader);
-  document.addEventListener('keydown', skipPreloader);
-
-  const startTime = performance.now();
-  const duration = 2000;
-
-  function finish() {
-    if (done) return;
-    done = true;
-    bar.style.width = '100%';
-    drawCube(1, Math.PI * 0.25);
-    setTimeout(() => {
-      gsap.to('#preloader', {
-        opacity: 0,
-        duration: 0.6,
-        ease: 'power2.inOut',
-        onComplete: () => {
-          document.getElementById('preloader').style.display = 'none';
-          onComplete();
-        }
-      });
-    }, 150);
-  }
-
-  // Fallback: force complete after 2.5s regardless of rAF support
-  setTimeout(finish, 2500);
-
-  function tick(now) {
-    if (done) return;
-    const elapsed = now - startTime;
-    progress = Math.min(elapsed / duration, 1);
-    bar.style.width = (progress * 100) + '%';
-
-    scale = progress < 0.3 ? (progress / 0.3) : 1;
-    angle = progress * Math.PI * 1.5;
-    drawCube(scale * 0.95, angle);
-
-    if (progress < 1) {
-      requestAnimationFrame(tick);
-    } else {
-      finish();
-    }
-  }
-  requestAnimationFrame(tick);
-}
-
-/* ================================================================
-   THREE.JS SCENE
-   ================================================================ */
-function initScene() {
+/* ══════════════════════════════════════════════════════════════
+   THREE.JS — SCENE SETUP
+   ══════════════════════════════════════════════════════════════ */
+function initThree() {
+  clock = new THREE.Clock();
   scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x080808, 0.035);
+  scene.background = new THREE.Color(0x070707);
+  // Very subtle atmospheric fog
+  scene.fog = new THREE.FogExp2(0x070707, 0.028);
 
-  // Camera
-  camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 200);
-  camera.position.set(0, 1, 9);
+  // Camera — fixed, facing cube front face squarely
+  camera = new THREE.PerspectiveCamera(38, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.set(0, 0, 9.5);
+  camera.lookAt(0, 0, 0);
 
   // Renderer
   const canvas = document.getElementById('main-canvas');
-  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.1;
+  renderer.toneMappingExposure = 1.15;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-  // Lights
-  const ambient = new THREE.AmbientLight(0xffffff, 0.18);
-  scene.add(ambient);
+  buildLights();
+  buildCube();
+  loadGLB();
 
-  const keyLight = new THREE.DirectionalLight(0xffffff, 1.8);
-  keyLight.position.set(5, 8, 6);
-  keyLight.castShadow = true;
-  scene.add(keyLight);
+  // Subtle floating particles
+  buildParticles();
 
-  const rimLight = new THREE.DirectionalLight(0x4F98A3, 0.6);
-  rimLight.position.set(-6, 2, -4);
-  scene.add(rimLight);
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    positionFaceContent();
+  });
 
-  const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
-  fillLight.position.set(-3, -2, 5);
-  scene.add(fillLight);
-
-  const warmAccent = new THREE.PointLight(0xF5C842, 0.4, 12);
-  warmAccent.position.set(3, -2, 3);
-  scene.add(warmAccent);
-
-  buildProceduralCube();
-  loadGLBCube();
-
-  window.addEventListener('resize', onResize);
-  render();
+  renderLoop();
 }
 
-/* ── PROCEDURAL CUBE (shown during GLB load + used for preloader anim) ── */
-function buildProceduralCube() {
+function buildLights() {
+  // Key — defines form
+  const key = new THREE.DirectionalLight(0xffffff, 2.2);
+  key.position.set(5, 7, 8);
+  key.castShadow = true;
+  scene.add(key);
+
+  // Rim — edge definition
+  const rim = new THREE.DirectionalLight(0x4F98A3, 0.8);
+  rim.position.set(-6, 1, -5);
+  scene.add(rim);
+
+  // Fill — prevent crushed shadows
+  const fill = new THREE.AmbientLight(0xffffff, 0.18);
+  scene.add(fill);
+
+  // Warm accent point
+  const warm = new THREE.PointLight(0xF5C842, 0.5, 14);
+  warm.position.set(3, -3, 4);
+  scene.add(warm);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PROCEDURAL PREMIUM CUBE
+   matte black shell + beveled edges + emissive colored stickers
+   ══════════════════════════════════════════════════════════════ */
+function buildCube() {
   cubeGroup = new THREE.Group();
   scene.add(cubeGroup);
 
-  const SIZE   = 0.62;
-  const GAP    = 0.04;
-  const BEVEL  = 0.06;
-  const STEP   = SIZE + GAP;
+  const SIZE  = 0.62;
+  const GAP   = 0.03;
+  const STEP  = SIZE + GAP;
 
   const shellMat = new THREE.MeshPhysicalMaterial({
-    color: 0x0d0d0d,
-    metalness: 0.85,
-    roughness: 0.12,
-    reflectivity: 0.9,
-    clearcoat: 1,
-    clearcoatRoughness: 0.05,
+    color:              0x0c0c0c,
+    metalness:          0.9,
+    roughness:          0.08,
+    reflectivity:       0.95,
+    clearcoat:          1.0,
+    clearcoatRoughness: 0.04,
   });
 
-  // Map face directions to colors
-  const faceColorMap = {
-    '+z': 0x2979F2,  // front  = blue
-    '-z': 0x2DBB6B,  // back   = green
-    '+y': 0xE8E8E0,  // top    = white
-    '-y': 0xF5C842,  // bottom = yellow
-    '+x': 0xF06B20,  // right  = orange
-    '-x': 0xE8293A,  // left   = red
+  // Face direction → sticker color
+  const faceColors = {
+    '+x': 0xF06B20, '-x': 0xE8293A,
+    '+y': 0xE8E8E0, '-y': 0xF5C842,
+    '+z': 0x2979F2, '-z': 0x2DBB6B,
   };
+
+  const stickerMats = {};
+  for (const [dir, col] of Object.entries(faceColors)) {
+    stickerMats[dir] = new THREE.MeshStandardMaterial({
+      color:             col,
+      emissive:          col,
+      emissiveIntensity: 0.18,
+      roughness:         0.5,
+      metalness:         0.0,
+    });
+  }
+
+  const faces3D = [
+    { dir: '+x', rot: [0,  Math.PI/2, 0],  pos: [SIZE/2 + 0.004, 0, 0] },
+    { dir: '-x', rot: [0, -Math.PI/2, 0],  pos: [-SIZE/2 - 0.004, 0, 0] },
+    { dir: '+y', rot: [-Math.PI/2, 0, 0],  pos: [0,  SIZE/2 + 0.004, 0] },
+    { dir: '-y', rot: [ Math.PI/2, 0, 0],  pos: [0, -SIZE/2 - 0.004, 0] },
+    { dir: '+z', rot: [0, 0, 0],            pos: [0, 0,  SIZE/2 + 0.004] },
+    { dir: '-z', rot: [0, Math.PI, 0],      pos: [0, 0, -SIZE/2 - 0.004] },
+  ];
 
   for (let x = -1; x <= 1; x++) {
     for (let y = -1; y <= 1; y++) {
       for (let z = -1; z <= 1; z++) {
-        const pieceGroup = new THREE.Group();
-        pieceGroup.position.set(x * STEP, y * STEP, z * STEP);
+        const piece = new THREE.Group();
+        piece.position.set(x * STEP, y * STEP, z * STEP);
 
         // Shell
-        const shellGeo = new THREE.BoxGeometry(SIZE - 0.02, SIZE - 0.02, SIZE - 0.02);
-        const shell = new THREE.Mesh(shellGeo, shellMat);
-        pieceGroup.add(shell);
+        const geo  = new THREE.BoxGeometry(SIZE, SIZE, SIZE);
+        const mesh = new THREE.Mesh(geo, shellMat);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        piece.add(mesh);
 
-        // Sticker tiles — only on exposed faces
-        const stickerSize = SIZE * 0.72;
-        const offset = SIZE * 0.5 + 0.004;
-
-        const faces = [
-          { dir: '+x', visible: x === 1,  rot: [0, Math.PI/2, 0],   pos: [offset, 0, 0] },
-          { dir: '-x', visible: x === -1, rot: [0, -Math.PI/2, 0],  pos: [-offset, 0, 0] },
-          { dir: '+y', visible: y === 1,  rot: [-Math.PI/2, 0, 0],  pos: [0, offset, 0] },
-          { dir: '-y', visible: y === -1, rot: [Math.PI/2, 0, 0],   pos: [0, -offset, 0] },
-          { dir: '+z', visible: z === 1,  rot: [0, 0, 0],            pos: [0, 0, offset] },
-          { dir: '-z', visible: z === -1, rot: [0, Math.PI, 0],      pos: [0, 0, -offset] },
-        ];
-
-        faces.forEach(f => {
-          if (!f.visible) return;
-          const geo = new THREE.PlaneGeometry(stickerSize, stickerSize);
-          const col = faceColorMap[f.dir];
-          const mat = new THREE.MeshStandardMaterial({
-            color: col,
-            emissive: col,
-            emissiveIntensity: 0.22,
-            roughness: 0.55,
-            metalness: 0.0,
-          });
-          const sticker = new THREE.Mesh(geo, mat);
+        // Stickers on exposed faces
+        const stickerGeo = new THREE.PlaneGeometry(SIZE * 0.74, SIZE * 0.74);
+        for (const f of faces3D) {
+          const exposed =
+            (f.dir === '+x' && x === 1)  ||
+            (f.dir === '-x' && x === -1) ||
+            (f.dir === '+y' && y === 1)  ||
+            (f.dir === '-y' && y === -1) ||
+            (f.dir === '+z' && z === 1)  ||
+            (f.dir === '-z' && z === -1);
+          if (!exposed) continue;
+          const sticker = new THREE.Mesh(stickerGeo, stickerMats[f.dir]);
           sticker.position.set(...f.pos);
           sticker.rotation.set(...f.rot);
-          sticker.userData.stickerColor = col;
-          pieceGroup.add(sticker);
-        });
+          sticker.userData.isSticker = true;
+          piece.add(sticker);
+        }
 
-        pieceGroup.userData.gridPos = { x, y, z };
-        cubeGroup.add(pieceGroup);
+        cubeGroup.add(piece);
       }
     }
   }
 
-  cubeGroup.userData.built = true;
+  // Store initial rotation target
+  cubeGroup.userData.targetEuler = [0, 0, 0];
 }
 
-/* ── LOAD THE GLB (replaces procedural cube if successful) ── */
-function loadGLBCube() {
+/* ══════════════════════════════════════════════════════════════
+   OPTIONAL GLB OVERRIDE
+   ══════════════════════════════════════════════════════════════ */
+function loadGLB() {
   const draco = new DRACOLoader();
   draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/');
-
   const loader = new GLTFLoader();
   loader.setDRACOLoader(draco);
 
-  // Use an <img> element trick to trigger the S3 redirect, then read src
-  // Actually for GLB, we serve it as a local file via the deploy proxy.
-  // We'll try loading it; if it fails we keep the procedural cube.
-  loader.load(
-    './assets/rubiks_cube.glb',
-    (gltf) => {
-      cubeModel = gltf.scene;
-      // Scale and center
-      const box = new THREE.Box3().setFromObject(cubeModel);
-      const center = box.getCenter(new THREE.Vector3());
-      const size = box.getSize(new THREE.Vector3());
-      const maxDim = Math.max(size.x, size.y, size.z);
-      const scale = 3.2 / maxDim;
-      cubeModel.scale.setScalar(scale);
-      cubeModel.position.sub(center.multiplyScalar(scale));
+  loader.load('./assets/rubiks_cube.glb', gltf => {
+    const model = gltf.scene;
+    const box   = new THREE.Box3().setFromObject(model);
+    const size  = box.getSize(new THREE.Vector3());
+    const maxD  = Math.max(size.x, size.y, size.z);
+    const scale = 3.0 / maxD;
+    model.scale.setScalar(scale);
+    model.position.sub(box.getCenter(new THREE.Vector3()).multiplyScalar(scale));
 
-      // Upgrade materials to premium
-      cubeModel.traverse(child => {
-        if (child.isMesh) {
-          child.castShadow = true;
-          child.receiveShadow = true;
-          if (child.material) {
-            child.material.metalness = 0.2;
-            child.material.roughness = 0.45;
-            if (child.material.map) child.material.map.anisotropy = renderer.capabilities.getMaxAnisotropy();
-          }
+    model.traverse(c => {
+      if (c.isMesh) {
+        c.castShadow = true;
+        c.receiveShadow = true;
+        if (c.material) {
+          c.material.metalness = 0.15;
+          c.material.roughness = 0.4;
         }
-      });
+      }
+    });
 
-      // Swap out procedural cube
-      scene.remove(cubeGroup);
-      cubeGroup = new THREE.Group();
-      cubeGroup.add(cubeModel);
-      scene.add(cubeGroup);
-      console.log('GLB loaded successfully');
-    },
-    undefined,
-    (err) => {
-      console.warn('GLB load failed, keeping procedural cube:', err.message);
-    }
-  );
+    // Swap groups
+    scene.remove(cubeGroup);
+    const newGroup = new THREE.Group();
+    newGroup.add(model);
+    newGroup.userData.targetEuler = [0, 0, 0];
+    scene.add(newGroup);
+    cubeGroup = newGroup;
+    console.log('GLB loaded');
+  }, undefined, err => {
+    console.warn('GLB failed, using procedural cube:', err.message);
+  });
 }
 
-/* ================================================================
-   RENDER LOOP
-   ================================================================ */
-function render() {
-  requestAnimationFrame(render);
-  const t = clock.getElapsedTime();
+/* ══════════════════════════════════════════════════════════════
+   FLOATING PARTICLES
+   ══════════════════════════════════════════════════════════════ */
+function buildParticles() {
+  const N   = 120;
+  const geo = new THREE.BufferGeometry();
+  const pos = new Float32Array(N * 3);
+  for (let i = 0; i < N; i++) {
+    pos[i*3]   = (Math.random() - .5) * 20;
+    pos[i*3+1] = (Math.random() - .5) * 20;
+    pos[i*3+2] = (Math.random() - .5) * 20;
+  }
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  const mat = new THREE.PointsMaterial({
+    color: 0x4F98A3,
+    size: 0.025,
+    transparent: true,
+    opacity: 0.35,
+    sizeAttenuation: true,
+  });
+  const pts = new THREE.Points(geo, mat);
+  scene.add(pts);
 
-  if (cubeGroup) {
-    // Smooth mouse parallax
-    mouse.x += (mouse.nx - mouse.x) * 0.04;
-    mouse.y += (mouse.ny - mouse.y) * 0.04;
+  // Slowly drift
+  const origPos = pos.slice();
+  let t = 0;
+  function driftParticles() {
+    t += 0.0004;
+    for (let i = 0; i < N; i++) {
+      pts.geometry.attributes.position.array[i*3+1] = origPos[i*3+1] + Math.sin(t + i * 0.7) * 0.15;
+    }
+    pts.geometry.attributes.position.needsUpdate = true;
+  }
+  // attach to render loop via userData
+  pts.userData.drift = driftParticles;
+  scene.userData.particles = pts;
+}
 
-    // Idle breathing
-    cubeGroup.position.y = Math.sin(t * 0.6) * 0.06;
+/* ══════════════════════════════════════════════════════════════
+   RENDER LOOP — camera is MOSTLY FIXED, minimal parallax
+   ══════════════════════════════════════════════════════════════ */
+function renderLoop() {
+  requestAnimationFrame(renderLoop);
+  const elapsed = clock.getElapsedTime();
 
-    // Subtle mouse parallax
-    cubeGroup.rotation.x += (mouse.y * 0.08 - cubeGroup.rotation.x) * 0.05;
-    cubeGroup.rotation.y += (mouse.x * 0.12 - cubeGroup.rotation.y) * 0.05;
+  // Very subtle mouse parallax — ONLY when IDLE (never during transitions)
+  if (currentState === State.IDLE) {
+    mouseSmooth.x += (mouseTarget.x - mouseSmooth.x) * 0.03;
+    mouseSmooth.y += (mouseTarget.y - mouseSmooth.y) * 0.03;
+
+    // Micro parallax on cube — max ±2.5° — this is NOT constant rotation
+    // It is a static offset that tracks the cursor position
+    if (cubeGroup) {
+      cubeGroup.rotation.x = THREE.MathUtils.lerp(
+        cubeGroup.rotation.x,
+        FACE_ROTATIONS[currentFaceIdx].euler[0] - mouseSmooth.y * 0.04,
+        0.06
+      );
+      cubeGroup.rotation.y = THREE.MathUtils.lerp(
+        cubeGroup.rotation.y,
+        FACE_ROTATIONS[currentFaceIdx].euler[1] + mouseSmooth.x * 0.04,
+        0.06
+      );
+    }
+  }
+
+  // Particle drift
+  if (scene.userData.particles?.userData?.drift) {
+    scene.userData.particles.userData.drift();
   }
 
   renderer.render(scene, camera);
 }
 
-function onResize() {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-}
+/* ══════════════════════════════════════════════════════════════
+   CONTENT SYSTEM — populate dynamic faces
+   ══════════════════════════════════════════════════════════════ */
+function populateContent() {
 
-/* ================================================================
-   SCROLL CHOREOGRAPHY
-   ================================================================ */
-function initScrollTimeline() {
-  const chapters = document.querySelectorAll('.chapter');
-
-  // ── Chapter 1 · Hero ─────────────────────────────────────
-  // Camera push + cube slow
-  ScrollTrigger.create({
-    trigger: '#ch-hero',
-    start: 'top top',
-    end: 'bottom top',
-    scrub: 1.5,
-    onUpdate: (self) => {
-      const p = self.progress;
-      // Camera dollies in
-      gsap.set(camera.position, { z: 9 - p * 2.5 });
-      // Subtle scene darkening via fog
-      scene.fog.density = 0.035 + p * 0.025;
-      // Cube slows as we scroll
-      if (cubeGroup) {
-        cubeGroup.rotation.z = p * 0.3;
-      }
-    }
-  });
-
-  // ── Chapter 2 · About ────────────────────────────────────
-  ScrollTrigger.create({
-    trigger: '#ch-about',
-    start: 'top 80%',
-    end: 'bottom 20%',
-    scrub: 1,
-    onUpdate: (self) => {
-      const p = self.progress;
-      if (!cubeGroup) return;
-      // Cube rotates to face front
-      const targetY = p * Math.PI * 0.25;
-      cubeGroup.rotation.y += (targetY - cubeGroup.rotation.y) * 0.1;
-      camera.position.z = 6.5 + (1 - p) * 2;
-      camera.position.x = -p * 1.5;
-    }
-  });
-
-  // ── Chapter 3 · Projects ────────────────────────────────
-  ScrollTrigger.create({
-    trigger: '#ch-projects',
-    start: 'top 80%',
-    end: 'center center',
-    scrub: 1,
-    onUpdate: (self) => {
-      const p = self.progress;
-      if (!cubeGroup) return;
-      // Cube "explodes" slightly via scale
-      const explodeScale = 1 + p * 0.15;
-      cubeGroup.scale.setScalar(explodeScale);
-      // Dramatic rotation
-      cubeGroup.rotation.y += 0.003;
-      camera.position.z = 5 + p * 2;
-      camera.position.x = -1.5 + p * 3;
-    }
-  });
-
-  // ── Chapter 4 · Skills ───────────────────────────────────
-  ScrollTrigger.create({
-    trigger: '#ch-skills',
-    start: 'top 70%',
-    end: 'bottom 30%',
-    scrub: 1,
-    onUpdate: (self) => {
-      const p = self.progress;
-      if (!cubeGroup) return;
-      cubeGroup.scale.setScalar(0.9 + p * 0.1);
-      cubeGroup.rotation.x = p * Math.PI * 0.15;
-      camera.position.y = 1 + p * 1.5;
-      camera.position.z = 7 - p;
-    }
-  });
-
-  // ── Chapter 5 · Experience ──────────────────────────────
-  ScrollTrigger.create({
-    trigger: '#ch-experience',
-    start: 'top 70%',
-    end: 'center center',
-    scrub: 1,
-    onUpdate: (self) => {
-      const p = self.progress;
-      if (!cubeGroup) return;
-      // Cube splits into layers effect via Y offset per layer
-      const orbitAngle = p * Math.PI * 0.4;
-      camera.position.x = Math.sin(orbitAngle) * 2;
-      camera.position.z = 7 + Math.cos(orbitAngle) * 0.5;
-      cubeGroup.rotation.y = -p * 0.5;
-    }
-  });
-
-  // ── Chapter 6 · Contact ──────────────────────────────────
-  ScrollTrigger.create({
-    trigger: '#ch-contact',
-    start: 'top 80%',
-    end: 'center center',
-    scrub: 1,
-    onUpdate: (self) => {
-      const p = self.progress;
-      if (!cubeGroup) return;
-      // Cube "solves" — returns to clean rotation
-      cubeGroup.rotation.x += (0 - cubeGroup.rotation.x) * 0.08;
-      cubeGroup.rotation.y += (Math.PI * 0.25 - cubeGroup.rotation.y) * 0.05;
-      cubeGroup.scale.setScalar(1 + p * 0.05);
-
-      // Intensify emissive on solve
-      cubeGroup.traverse(child => {
-        if (child.isMesh && child.material && child.material.emissiveIntensity !== undefined) {
-          child.material.emissiveIntensity = 0.22 + p * 0.3;
-        }
-      });
-
-      // Widen camera for payoff
-      camera.position.z = 6 + p * 2;
-      camera.position.x = 0;
-      camera.position.y = 1;
-    }
-  });
-
-  // ── Chapter progress dots ────────────────────────────────
-  chapters.forEach((ch, i) => {
-    ScrollTrigger.create({
-      trigger: ch,
-      start: 'top center',
-      end: 'bottom center',
-      onEnter:      () => setActiveChapter(i),
-      onEnterBack:  () => setActiveChapter(i),
-    });
-  });
-}
-
-function setActiveChapter(idx) {
-  currentChapter = idx;
-  document.querySelectorAll('.nav-dot').forEach((dot, i) => {
-    dot.classList.toggle('active', i === idx);
-  });
-}
-
-/* ================================================================
-   EXPERIENCE TIMELINE — intersection reveal
-   ================================================================ */
-function initExperienceTimeline() {
-  const container = document.getElementById('exp-timeline');
-
-  contentConfig.timelineEntries.forEach((entry, i) => {
+  // PROJECTS
+  const pm = document.getElementById('project-modules');
+  CONFIG.projects.forEach((p, i) => {
     const el = document.createElement('div');
-    el.className = 'exp-entry';
-    el.style.transitionDelay = `${i * 0.08}s`;
+    el.className = 'proj-module';
+    el.style.setProperty('--proj-color', p.color);
     el.innerHTML = `
-      <div class="exp-date">${entry.date}</div>
-      <div class="exp-role">${entry.role}</div>
-      <div class="exp-org">${entry.org}</div>
-      <div class="exp-desc">${entry.desc}</div>
-      <div class="exp-tags">${entry.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+      <div class="proj-num">${String(i+1).padStart(2,'0')}</div>
+      <div class="proj-title">${p.title}</div>
+      <div class="proj-tags">${p.tags.map(t => `<span class="ptag">${t}</span>`).join('')}</div>
+      <div class="proj-arrow">Open →</div>
     `;
-    container.appendChild(el);
+    el.addEventListener('click', () => openModal(p));
+    pm.appendChild(el);
   });
 
-  // Scroll reveal
-  ScrollTrigger.create({
-    trigger: '#ch-experience',
-    start: 'top 60%',
-    onEnter: () => {
-      document.querySelectorAll('.exp-entry').forEach((el, i) => {
-        setTimeout(() => el.classList.add('revealed'), i * 120);
-      });
-    }
-  });
-}
-
-/* ================================================================
-   PROJECTS GRID
-   ================================================================ */
-function initProjectsGrid() {
-  const grid = document.getElementById('project-grid');
-  const modal = document.getElementById('project-modal');
-  const modalContent = document.getElementById('modal-content');
-  const modalClose = document.getElementById('modal-close');
-
-  contentConfig.showcaseModules.forEach((p, i) => {
-    const card = document.createElement('div');
-    card.className = 'project-card';
-    card.style.setProperty('--card-glow', hexToRgba(p.color, 0.12));
-    card.innerHTML = `
-      <div class="project-card-num">${String(i + 1).padStart(2, '0')}</div>
-      <div class="project-card-title">${p.title}</div>
-      <div class="project-card-tags">${p.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
-      <div class="project-card-desc">${p.desc}</div>
-      <div class="project-card-arrow">View Project →</div>
-    `;
-    card.addEventListener('click', () => openModal(p));
-    grid.appendChild(card);
+  // SKILLS
+  ['frontend','ai','backend'].forEach(axis => {
+    const el = document.getElementById(`skill-${axis}`);
+    CONFIG.skills[axis].forEach(s => {
+      const chip = document.createElement('div');
+      chip.className = 'skill-chip';
+      chip.textContent = s;
+      el.appendChild(chip);
+    });
   });
 
-  function openModal(p) {
-    modalContent.innerHTML = `
-      <div class="modal-title">${p.title}</div>
-      <div class="modal-tags">${p.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
-      <div class="modal-section-label">Problem</div>
-      <div class="modal-body">${p.problem}</div>
-      <div class="modal-section-label">Solution</div>
-      <div class="modal-body">${p.solution}</div>
-      <div class="modal-links">
-        ${p.github ? `<a class="modal-link" href="${p.github}" target="_blank" rel="noopener">GitHub →</a>` : ''}
-        ${p.demo   ? `<a class="modal-link" href="${p.demo}"   target="_blank" rel="noopener">Live Demo →</a>` : ''}
-      </div>
-    `;
-    modal.classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeModal() {
-    modal.classList.remove('open');
-    document.body.style.overflow = '';
-  }
-
-  modalClose.addEventListener('click', closeModal);
-  modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-}
-
-/* ================================================================
-   SKILL CONSTELLATION
-   ================================================================ */
-function initSkillConstellation() {
-  const container = document.getElementById('skill-constellation');
-  const tooltip   = document.getElementById('skill-tooltip');
-
-  // Draw SVG connection lines
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:0.25;';
-  container.appendChild(svg);
-
-  const nodes = [];
-
-  contentConfig.capabilityNodes.forEach(n => {
+  // TIMELINE
+  const tm = document.getElementById('timeline-modules');
+  CONFIG.experience.forEach(e => {
     const el = document.createElement('div');
-    el.className = `skill-node ${n.axis}`;
-    el.style.left = n.x + '%';
-    el.style.top  = n.y + '%';
-    el.innerHTML  = `<div class="skill-node-dot"></div><div class="skill-node-label">${n.label}</div>`;
-
-    el.addEventListener('mouseenter', (e) => {
-      tooltip.innerHTML = `<strong>${n.label}</strong><br/>${n.exp}`;
-      tooltip.classList.add('visible');
-    });
-    el.addEventListener('mousemove', (e) => {
-      const rect = container.getBoundingClientRect();
-      let tx = e.clientX - rect.left + 16;
-      let ty = e.clientY - rect.top  + 12;
-      if (tx + 210 > rect.width)  tx = e.clientX - rect.left - 210;
-      if (ty + 80  > rect.height) ty = e.clientY - rect.top  - 70;
-      tooltip.style.left = tx + 'px';
-      tooltip.style.top  = ty + 'px';
-    });
-    el.addEventListener('mouseleave', () => tooltip.classList.remove('visible'));
-
-    container.appendChild(el);
-    nodes.push({ el, n });
+    el.className = 'tm-entry';
+    el.innerHTML = `
+      <div class="tm-date">${e.date}</div>
+      <div class="tm-role">${e.role}</div>
+      <div class="tm-org">${e.org}</div>
+      <div class="tm-desc">${e.desc}</div>
+      <div class="tm-tags">${e.tags.map(t=>`<span class="ttag">${t}</span>`).join('')}</div>
+    `;
+    tm.appendChild(el);
   });
 
-  // Animate nodes in with stagger
-  ScrollTrigger.create({
-    trigger: '#ch-skills',
-    start: 'top 60%',
-    onEnter: () => {
-      nodes.forEach(({ el }, i) => {
-        gsap.fromTo(el,
-          { opacity: 0, scale: 0 },
-          { opacity: 1, scale: 1, duration: 0.5, delay: i * 0.04, ease: 'back.out(1.5)' }
-        );
-      });
-
-      // Draw lines between same-axis nodes after a beat
-      setTimeout(() => drawConnections(svg, nodes), 400);
-    }
-  });
-}
-
-function drawConnections(svg, nodes) {
-  const container = svg.parentElement;
-  const W = container.offsetWidth;
-  const H = container.offsetHeight;
-
-  const axes = ['frontend', 'ai', 'backend'];
-  const colors = { frontend: '#2979F2', ai: '#2DBB6B', backend: '#F06B20' };
-
-  axes.forEach(axis => {
-    const group = nodes.filter(({ n }) => n.axis === axis);
-    for (let i = 0; i < group.length - 1; i++) {
-      const a = group[i].n, b = group[i + 1].n;
-      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      line.setAttribute('x1', (a.x / 100) * W);
-      line.setAttribute('y1', (a.y / 100) * H);
-      line.setAttribute('x2', (b.x / 100) * W);
-      line.setAttribute('y2', (b.y / 100) * H);
-      line.setAttribute('stroke', colors[axis]);
-      line.setAttribute('stroke-width', '1');
-      svg.appendChild(line);
-    }
-  });
-}
-
-/* ================================================================
-   CONTACT CTA
-   ================================================================ */
-function initContact() {
-  const cta = document.getElementById('contact-cta');
-  contentConfig.contactActions.forEach(action => {
+  // CONTACT CTAs
+  const ctaRow = document.getElementById('contact-cta-row');
+  CONFIG.contact.forEach(c => {
     const a = document.createElement('a');
-    a.className = `cta-btn${action.primary ? ' primary' : ''}`;
-    a.href = action.href;
+    a.className = `cta-link${c.primary ? ' primary' : ''}`;
+    a.href = c.href;
     a.target = '_blank';
     a.rel = 'noopener noreferrer';
-    a.textContent = action.label;
-    cta.appendChild(a);
+    a.textContent = c.label;
+    ctaRow.appendChild(a);
   });
 
+  // Contact form
   document.getElementById('contact-form').addEventListener('submit', e => {
     e.preventDefault();
-    const btn = e.target.querySelector('.form-submit');
-    btn.textContent = 'Message Sent ✓';
-    btn.style.background = '#2DBB6B';
-    setTimeout(() => {
-      btn.innerHTML = 'Send Message <span class="btn-arrow">→</span>';
-      btn.style.background = '';
-      e.target.reset();
-    }, 3000);
+    const btn = e.target.querySelector('.cf-submit');
+    btn.textContent = 'Sent ✓';
+    setTimeout(() => { btn.textContent = 'Send →'; e.target.reset(); }, 3000);
   });
 }
 
-/* ================================================================
-   HERO ENTRANCE ANIMATIONS
-   ================================================================ */
-function animateHeroIn() {
-  const tl = gsap.timeline({ delay: 0.3 });
+/* ══════════════════════════════════════════════════════════════
+   PROJECT MODAL
+   ══════════════════════════════════════════════════════════════ */
+function openModal(p) {
+  const modal = document.getElementById('project-modal');
+  document.getElementById('modal-body').innerHTML = `
+    <div class="modal-title">${p.title}</div>
+    <div class="modal-tags">${p.tags.map(t=>`<span class="modal-tag">${t}</span>`).join('')}</div>
+    <div class="modal-sec">Problem</div>
+    <div class="modal-text">${p.problem}</div>
+    <div class="modal-sec">Solution</div>
+    <div class="modal-text">${p.solution}</div>
+    <div class="modal-links">
+      <a class="modal-link" href="#" target="_blank">GitHub →</a>
+      <a class="modal-link" href="#" target="_blank">Live Demo →</a>
+    </div>
+  `;
+  modal.classList.add('open');
+}
+function closeModal() {
+  document.getElementById('project-modal').classList.remove('open');
+}
 
-  tl.to('.hero-eyebrow', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' })
-    .to('.hero-name',    { opacity: 1,      duration: 0.9, ease: 'power3.out' }, '-=0.5')
-    .to('.hero-sub',     { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }, '-=0.4')
-    .to('.scroll-hint',  { opacity: 1,      duration: 0.6, ease: 'power3.out' }, '-=0.2')
-    .call(() => {
-      document.getElementById('nav').classList.add('visible');
-    }, null, 0.4);
+/* ══════════════════════════════════════════════════════════════
+   FACE CONTENT — POSITION & SIZE
+   The #face-content div maps pixel-perfectly to the cube face.
+   When the cube is facing the camera squarely, the face's
+   screen-space size is calculated and matched.
+   ══════════════════════════════════════════════════════════════ */
+function positionFaceContent() {
+  // The cube's front face spans from -1.03 to +1.03 world units (3×3 pieces)
+  const cubeHalfWorldSize = 1.03; // half the full cube edge
+  // Project two points to screen space
+  const v1 = new THREE.Vector3(-cubeHalfWorldSize, -cubeHalfWorldSize, cubeHalfWorldSize);
+  const v2 = new THREE.Vector3( cubeHalfWorldSize,  cubeHalfWorldSize, cubeHalfWorldSize);
+  v1.project(camera);
+  v2.project(camera);
+  const x1 = (v1.x + 1) / 2 * window.innerWidth;
+  const x2 = (v2.x + 1) / 2 * window.innerWidth;
+  const y1 = (1 - v1.y) / 2 * window.innerHeight;
+  const y2 = (1 - v2.y) / 2 * window.innerHeight;
+  const faceScreenSize = Math.min(Math.abs(x2 - x1), Math.abs(y1 - y2));
 
-  // Cube entrance
-  if (cubeGroup) {
-    gsap.from(cubeGroup.rotation, { y: Math.PI * 2, duration: 2.2, ease: 'power3.out', delay: 0.1 });
-    gsap.from(cubeGroup.scale, { x: 0, y: 0, z: 0, duration: 1.2, ease: 'back.out(1.3)', delay: 0.2 });
+  const fc = document.getElementById('face-content');
+  // Slightly smaller than the cube face for a "painted on" feel
+  const contentSize = faceScreenSize * 0.92;
+  fc.style.width  = contentSize + 'px';
+  fc.style.height = contentSize + 'px';
+  // Remove CSS var override — let it use exact pixel value
+  document.documentElement.style.setProperty('--face-size', contentSize + 'px');
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CHROME — Update HUD
+   ══════════════════════════════════════════════════════════════ */
+function updateChrome(idx) {
+  document.getElementById('ch-current').textContent = String(idx + 1).padStart(2, '0');
+  document.getElementById('face-tag-text').textContent = CONFIG.faces[idx];
+  document.querySelectorAll('.pdot').forEach((d, i) => {
+    d.classList.toggle('active', i === idx);
+  });
+  // Prev/next arrows
+  document.getElementById('nav-prev').disabled = idx === 0;
+  document.getElementById('nav-next').disabled = idx === FACE_ROTATIONS.length - 1;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   FACE CONTENT REVEAL
+   Children animate in sequentially — feel physically attached
+   to the cube surface (lift out, not float in from side)
+   ══════════════════════════════════════════════════════════════ */
+function revealFaceContent(idx) {
+  const face = document.getElementById(`face-${idx}`);
+  if (!face) return;
+
+  // Show container
+  face.style.opacity   = '1';
+  face.style.pointerEvents = 'auto';
+
+  // Get direct children to animate in
+  const children = Array.from(face.children);
+  gsap.set(children, { opacity: 0, y: 8, scale: 0.97 });
+
+  gsap.to(children, {
+    opacity:  1,
+    y:        0,
+    scale:    1,
+    duration: 0.5,
+    stagger:  0.06,
+    ease:     'power3.out',
+    delay:    0.08,
+  });
+}
+
+function hideFaceContent(idx, onComplete) {
+  const face = document.getElementById(`face-${idx}`);
+  if (!face) { onComplete?.(); return; }
+
+  const children = Array.from(face.children);
+  gsap.to(children, {
+    opacity:  0,
+    y:        -6,
+    scale:    0.96,
+    duration: 0.28,
+    stagger:  0.03,
+    ease:     'power2.in',
+    onComplete: () => {
+      face.style.opacity = '0';
+      face.style.pointerEvents = 'none';
+      onComplete?.();
+    }
+  });
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CUBE FACE STICKER EMISSIVE — pulse on active face
+   ══════════════════════════════════════════════════════════════ */
+function pulseActiveStickers(intensity) {
+  if (!cubeGroup) return;
+  cubeGroup.traverse(c => {
+    if (c.isMesh && c.userData.isSticker && c.material) {
+      gsap.to(c.material, {
+        emissiveIntensity: intensity,
+        duration: 0.6,
+        ease: 'power2.out',
+      });
+    }
+  });
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CORE STATE MACHINE — TRANSITION SEQUENCE
+   ══════════════════════════════════════════════════════════════
+
+   Flow:
+   1. HIDE_CONTENT   — content collapses off the face
+   2. ROTATE         — cube rotates with anticipation → overshoot → settle
+   3. LOCK           — cube perfectly perpendicular, no motion
+   4. PAUSE          — 400ms of silence (anticipation)
+   5. REVEAL         — content loads onto the new face
+   6. Back to IDLE
+
+   ══════════════════════════════════════════════════════════════ */
+function transitionToFace(nextIdx) {
+  if (isTransitioning) return;
+  if (nextIdx === currentFaceIdx) return;
+  if (nextIdx < 0 || nextIdx >= FACE_ROTATIONS.length) return;
+
+  isTransitioning = true;
+  currentState    = State.HIDE_CONTENT;
+
+  // Block interaction during transition
+  const blocker = document.getElementById('transition-blocker');
+  if (blocker) blocker.classList.add('active');
+
+  // Dim stickers slightly — cube is "empty" during rotation
+  pulseActiveStickers(0.08);
+
+  // STEP 1 — Hide current face content
+  hideFaceContent(currentFaceIdx, () => {
+
+    currentState = State.ROTATE;
+
+    // Camera very subtle push in during rotation — cinematic, not dramatic
+    gsap.to(camera.position, {
+      z: 9.0,
+      duration: 0.2,
+      ease: 'power2.in',
+    });
+
+    // STEP 2 — Rotate the cube
+    // Determine target Euler for next face
+    const target = FACE_ROTATIONS[nextIdx].euler;
+
+    // Calculate shortest path for Y rotation
+    // (avoid spinning the wrong way around)
+    const tl = gsap.timeline({
+      onComplete: () => {
+        currentState = State.LOCK;
+        onRotateComplete();
+      }
+    });
+
+    // Anticipation: tiny counter-motion before the big rotate
+    tl.to(cubeGroup.rotation, {
+      x: FACE_ROTATIONS[currentFaceIdx].euler[0] - (target[0] - FACE_ROTATIONS[currentFaceIdx].euler[0]) * 0.06,
+      y: FACE_ROTATIONS[currentFaceIdx].euler[1] - (target[1] - FACE_ROTATIONS[currentFaceIdx].euler[1]) * 0.06,
+      z: FACE_ROTATIONS[currentFaceIdx].euler[2] - (target[2] - FACE_ROTATIONS[currentFaceIdx].euler[2]) * 0.06,
+      duration: 0.18,
+      ease: 'power2.in',
+    });
+
+    // Main rotation — expo out with slight overshoot via power4.out
+    tl.to(cubeGroup.rotation, {
+      x: target[0],
+      y: target[1],
+      z: target[2],
+      duration: 0.82,
+      ease: 'power4.out',
+    });
+
+    // Microscopic settle — the overshoot correction
+    tl.to(cubeGroup.rotation, {
+      x: target[0],
+      y: target[1],
+      z: target[2],
+      duration: 0.22,
+      ease: 'elastic.out(1, 0.6)',
+    });
+  });
+
+  function onRotateComplete() {
+    // Snap cube exactly perpendicular — zero drift
+    cubeGroup.rotation.set(...FACE_ROTATIONS[nextIdx].euler);
+    mouseSmooth.x = 0;
+    mouseSmooth.y = 0;
+
+    // Camera returns to nominal position
+    gsap.to(camera.position, {
+      z: 9.5,
+      duration: 0.35,
+      ease: 'power2.out',
+    });
+
+    currentFaceIdx = nextIdx;
+    updateChrome(currentFaceIdx);
+
+    // STEP 3 — Locked. Brief silence before content appears.
+    currentState = State.PAUSE;
+    setTimeout(() => {
+
+      // STEP 4 — Reveal content
+      currentState = State.REVEAL;
+      pulseActiveStickers(0.22);
+      revealFaceContent(currentFaceIdx);
+
+      // Brief delay then return to IDLE
+      setTimeout(() => {
+        currentState    = State.IDLE;
+        isTransitioning = false;
+        if (blocker) blocker.classList.remove('active');
+      }, 600);
+
+    }, 380); // pause duration — cinematic silence
   }
 }
 
-/* ================================================================
-   UTILS
-   ================================================================ */
-function hexToRgba(hex, a) {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `rgba(${r},${g},${b},${a})`;
+/* ══════════════════════════════════════════════════════════════
+   INPUT SYSTEM
+   Discrete chapter progression — no scroll scrubbing
+   ══════════════════════════════════════════════════════════════ */
+function initInput() {
+  // Wheel — advance one face per discrete scroll
+  // Listen on multiple targets to catch sandboxed iframe delivery differences
+  let wheelCooldown = false;
+  function onWheel(e) {
+    if (wheelCooldown || isTransitioning) return;
+    wheelCooldown = true;
+    setTimeout(() => { wheelCooldown = false; }, 900); // long enough to not double-fire
+    if (e.deltaY > 2 || e.deltaX > 2) {
+      transitionToFace(currentFaceIdx + 1);
+    } else if (e.deltaY < -2 || e.deltaX < -2) {
+      transitionToFace(currentFaceIdx - 1);
+    }
+  }
+  window.addEventListener('wheel', onWheel, { passive: true });
+  document.getElementById('main-canvas').addEventListener('wheel', onWheel, { passive: true });
+  document.getElementById('face-content').addEventListener('wheel', onWheel, { passive: true });
+
+  // Keyboard — arrow keys / j/k
+  window.addEventListener('keydown', e => {
+    if (isTransitioning) return;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === 'j') {
+      transitionToFace(currentFaceIdx + 1);
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'k') {
+      transitionToFace(currentFaceIdx - 1);
+    }
+  });
+
+  // Touch swipe
+  let touchY0 = 0;
+  window.addEventListener('touchstart', e => { touchY0 = e.touches[0].clientY; }, { passive: true });
+  window.addEventListener('touchend', e => {
+    if (isTransitioning) return;
+    const dy = touchY0 - e.changedTouches[0].clientY;
+    if (Math.abs(dy) < 40) return;
+    transitionToFace(currentFaceIdx + (dy > 0 ? 1 : -1));
+  }, { passive: true });
+
+  // Nav arrows
+  document.getElementById('nav-prev').addEventListener('click', () => {
+    transitionToFace(currentFaceIdx - 1);
+  });
+  document.getElementById('nav-next').addEventListener('click', () => {
+    transitionToFace(currentFaceIdx + 1);
+  });
+
+  // Progress dots — click to jump
+  document.querySelectorAll('.pdot').forEach(dot => {
+    dot.addEventListener('click', () => {
+      transitionToFace(parseInt(dot.dataset.idx));
+    });
+  });
+
+  // Modal close
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  document.getElementById('project-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('project-modal')) closeModal();
+  });
+  window.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 }
 
-/* ================================================================
-   VIGNETTE
-   ================================================================ */
-function addVignette() {
-  const v = document.createElement('div');
-  v.id = 'vignette';
-  document.body.appendChild(v);
+/* ══════════════════════════════════════════════════════════════
+   PRELOADER
+   ══════════════════════════════════════════════════════════════ */
+function runPreloader(onDone) {
+  const canvas = document.getElementById('pre-canvas');
+  canvas.width = 160; canvas.height = 160;
+  const ctx = canvas.getContext('2d');
+  const bar = document.getElementById('pre-bar');
+  const lbl = document.getElementById('pre-label');
+
+  const dots = ['', '.', '..', '...'];
+  let dotIdx = 0;
+  const dotTimer = setInterval(() => {
+    dotIdx = (dotIdx + 1) % 4;
+    lbl.textContent = 'Initializing System' + dots[dotIdx];
+  }, 350);
+
+  let prog = 0;
+  let done = false;
+
+  function drawCube(t) {
+    ctx.clearRect(0, 0, 160, 160);
+    const cx = 80, cy = 80;
+    const s  = Math.min(t, 1);
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(t * Math.PI * 1.4);
+    ctx.scale(s * 0.88, s * 0.88);
+    // top face
+    ctx.beginPath();
+    ctx.moveTo(0, -44); ctx.lineTo(38, -24); ctx.lineTo(0, -4); ctx.lineTo(-38, -24);
+    ctx.closePath();
+    ctx.fillStyle = '#2979F2'; ctx.fill();
+    // left face
+    ctx.beginPath();
+    ctx.moveTo(-38, -24); ctx.lineTo(0, -4); ctx.lineTo(0, 36); ctx.lineTo(-38, 16);
+    ctx.closePath();
+    ctx.fillStyle = '#2DBB6B'; ctx.fill();
+    // right face
+    ctx.beginPath();
+    ctx.moveTo(0, -4); ctx.lineTo(38, -24); ctx.lineTo(38, 16); ctx.lineTo(0, 36);
+    ctx.closePath();
+    ctx.fillStyle = '#E8293A'; ctx.fill();
+    // edges
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(0,-44); ctx.lineTo(38,-24); ctx.lineTo(0,-4); ctx.lineTo(-38,-24); ctx.closePath(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,-4); ctx.lineTo(0,36); ctx.moveTo(-38,-24); ctx.lineTo(-38,16); ctx.moveTo(38,-24); ctx.lineTo(38,16); ctx.stroke();
+    ctx.restore();
+  }
+
+  function finish() {
+    if (done) return;
+    done = true;
+    clearInterval(dotTimer);
+    bar.style.width = '100%';
+    lbl.textContent = 'System Ready';
+    setTimeout(() => {
+      gsap.to('#preloader', {
+        opacity: 0, duration: 0.7, ease: 'power2.inOut',
+        onComplete: () => {
+          document.getElementById('preloader').style.display = 'none';
+          onDone();
+        }
+      });
+    }, 200);
+  }
+
+  // Timer-based (works in all environments)
+  const START = Date.now();
+  const DUR   = 2000;
+  const timer = setInterval(() => {
+    prog = Math.min((Date.now() - START) / DUR, 1);
+    bar.style.width = (prog * 100) + '%';
+    drawCube(prog);
+    if (prog >= 1) { clearInterval(timer); finish(); }
+  }, 16);
+
+  // Safety net
+  setTimeout(finish, 2800);
+
+  // Skip on click/key
+  canvas.parentElement.addEventListener('click', finish, { once: true });
+  document.addEventListener('keydown', finish, { once: true });
 }
 
-/* ================================================================
+/* ══════════════════════════════════════════════════════════════
    BOOT SEQUENCE
-   ================================================================ */
+   ══════════════════════════════════════════════════════════════ */
 function boot() {
   initCursor();
-  initParticles();
-  addVignette();
 
   runPreloader(() => {
-    // Show site
-    gsap.to('#site', { opacity: 1, duration: 0.8, ease: 'power2.out' });
 
-    // Initialize 3D scene
-    initScene();
+    // Fade in scene
+    gsap.to('#scene', { opacity: 1, duration: 0.8, ease: 'power2.out' });
 
-    // Build UI sections
-    initProjectsGrid();
-    initSkillConstellation();
-    initExperienceTimeline();
-    initContact();
+    // Init Three.js
+    initThree();
 
-    // Scroll timeline
-    initScrollTimeline();
+    // Populate dynamic content
+    populateContent();
 
-    // Hero entrance
-    animateHeroIn();
+    // Setup input
+    initInput();
+
+    // Wait one frame for Three to render, then measure cube on screen
+    requestAnimationFrame(() => {
+      positionFaceContent();
+      updateChrome(0);
+
+      // Reveal face 0 — HERO
+      // Small delay so Three.js has drawn at least one frame
+      setTimeout(() => {
+        // Cube entrance — scale in from zero with spring
+        if (cubeGroup) {
+          cubeGroup.scale.set(0, 0, 0);
+          gsap.to(cubeGroup.scale, {
+            x: 1, y: 1, z: 1,
+            duration: 1.1,
+            ease: 'back.out(1.4)',
+          });
+        }
+
+        // Reveal hero face content after cube lands
+        setTimeout(() => {
+          revealFaceContent(0);
+          currentState = State.IDLE;
+        }, 700);
+      }, 100);
+    });
   });
 }
 
