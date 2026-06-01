@@ -100,36 +100,6 @@ let mouseSmooth = { x: 0, y: 0 };
 /* ══════════════════════════════════════════════════════════════
    CURSOR
    ══════════════════════════════════════════════════════════════ */
-function initCursor() {
-  const dot  = document.getElementById('cursor');
-  const ring = document.getElementById('cursor-ring');
-  let mx = -100, my = -100, rx = -100, ry = -100;
-
-  document.addEventListener('mousemove', e => {
-    mx = e.clientX; my = e.clientY;
-    mouseTarget.x = (e.clientX / window.innerWidth)  * 2 - 1;
-    mouseTarget.y = (e.clientY / window.innerHeight) * 2 - 1;
-  });
-
-  const hoverSels = 'button, a, .id-tile, .proj-module, .skill-chip, .cta-link, .pdot';
-  document.addEventListener('mouseover', e => {
-    if (e.target.closest(hoverSels)) document.body.classList.add('hovering');
-  });
-  document.addEventListener('mouseout', e => {
-    if (e.target.closest(hoverSels)) document.body.classList.remove('hovering');
-  });
-
-  function loop() {
-    dot.style.left = mx + 'px';
-    dot.style.top  = my + 'px';
-    rx += (mx - rx) * 0.1;
-    ry += (my - ry) * 0.1;
-    ring.style.left = rx + 'px';
-    ring.style.top  = ry + 'px';
-    requestAnimationFrame(loop);
-  }
-  loop();
-}
 
 /* ══════════════════════════════════════════════════════════════
    THREE.JS — SCENE SETUP
@@ -869,7 +839,6 @@ function runPreloader(onDone) {
    BOOT SEQUENCE
    ══════════════════════════════════════════════════════════════ */
 function boot() {
-  initCursor();
 
   runPreloader(() => {
 
