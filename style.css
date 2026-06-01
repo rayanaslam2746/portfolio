@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════════════
-   CUBE PORTFOLIO v2 — FACE-AS-INTERFACE ARCHITECTURE
+   CUBE PORTFOLIO v3 — SPLIT-SCREEN LAYOUT
    ══════════════════════════════════════════════════════════════ */
 
 /* ── TOKENS ──────────────────────────────────────────────────── */
@@ -25,20 +25,16 @@
   --font-display: 'Space Grotesk', sans-serif;
   --font-mono:    'Space Mono', monospace;
 
-  --ease-out:      cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-in:       cubic-bezier(0.4, 0, 1, 1);
-  --ease-in-out:   cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-spring:   cubic-bezier(0.34, 1.56, 0.64, 1);
-  --ease-precise:  cubic-bezier(0.25, 0.46, 0.45, 0.94);
-
-  --face-size: min(52vmin, 420px);
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in:     cubic-bezier(0.4, 0, 1, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* ── RESET ───────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body {
   width: 100%; height: 100%;
-  overflow: hidden; /* NO scroll — chapter-based system */
+  overflow: hidden;
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-display);
@@ -59,9 +55,7 @@ button { font-family: inherit; background: none; border: none; cursor: pointer; 
   gap: 2.5rem;
 }
 #pre-canvas { width: 160px; height: 160px; display: block; }
-.pre-ui {
-  display: flex; flex-direction: column; align-items: center; gap: .75rem;
-}
+.pre-ui { display: flex; flex-direction: column; align-items: center; gap: .75rem; }
 .pre-mono {
   font-family: var(--font-mono);
   font-size: 10px;
@@ -69,23 +63,12 @@ button { font-family: inherit; background: none; border: none; cursor: pointer; 
   text-transform: uppercase;
   color: var(--text-muted);
 }
-.pre-bar-track {
-  width: 160px; height: 1px;
-  background: var(--border);
-}
-.pre-bar {
-  height: 100%;
-  width: 0;
-  background: linear-gradient(90deg, var(--accent), var(--yellow));
-}
+.pre-bar-track { width: 160px; height: 1px; background: var(--border); }
+.pre-bar { height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--yellow)); }
 
 /* ── SCENE ───────────────────────────────────────────────────── */
-#scene {
-  position: fixed; inset: 0;
-  overflow: hidden;
-}
+#scene { position: fixed; inset: 0; overflow: hidden; }
 
-/* THE CANVAS — fullscreen, behind everything */
 #main-canvas {
   position: absolute; inset: 0;
   z-index: 0;
@@ -94,95 +77,66 @@ button { font-family: inherit; background: none; border: none; cursor: pointer; 
 }
 
 /* ══════════════════════════════════════════════════════════════
-   FACE CONTENT SYSTEM
-   Content is absolutely positioned and maps to the cube face
-   in the center of the viewport. It does NOT scroll.
+   HERO OVERLAY
+   Name at top, school + hint at bottom, cube renders in center
    ══════════════════════════════════════════════════════════════ */
-#face-content {
-  position: absolute;
-  /* Centered exactly over the cube */
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  width: var(--face-size);
-  height: var(--face-size);
-  z-index: 10;
-  pointer-events: none;
-}
-
-/* ── FACE PANELS ─────────────────────────────────────────────── */
-.face {
+#hero-overlay {
   position: absolute;
   inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  padding: clamp(16px, 4%, 24px);
-  opacity: 0;
+  z-index: 10;
   pointer-events: none;
-  overflow: hidden;
-}
-.face.active {
-  pointer-events: auto;
+  opacity: 0;
 }
 
-/* face accent top bar — unique per face */
-.face::before {
-  content: '';
+.hero-top {
   position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 1px;
-  background: var(--face-accent, rgba(79,152,163,.4));
-  opacity: .6;
+  top: 8vh;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  white-space: nowrap;
 }
 
-/* ── FACE LABELS ─────────────────────────────────────────────── */
-.face-label {
+.hero-eyebrow {
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: .22em;
   text-transform: uppercase;
   color: var(--accent);
-  margin-bottom: .5rem;
-}
-.face-title {
-  font-size: clamp(1.4rem, 4vmin, 2rem);
-  font-weight: 700;
-  letter-spacing: -.02em;
-  line-height: 1;
   margin-bottom: .9rem;
 }
 
-/* ══ FACE 0 — HERO ══════════════════════════════════════════════ */
-#face-0 {
-  --face-accent: rgba(79,152,163,.5);
-  align-items: flex-start;
-  justify-content: center;
-}
-.face-hero { display: flex; flex-direction: column; gap: .55rem; }
-.hero-eyebrow {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: .2em;
-  text-transform: uppercase;
-  color: var(--accent);
-}
 .hero-name {
-  font-size: clamp(2.2rem, 10vmin, 5rem);
+  font-size: clamp(3.5rem, 8vw, 7rem);
   font-weight: 700;
-  line-height: .92;
-  letter-spacing: -.03em;
+  line-height: .88;
+  letter-spacing: -.04em;
+  color: var(--text);
 }
+
+.hero-bottom {
+  position: absolute;
+  bottom: 8vh;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .7rem;
+}
+
 .hero-school {
-  font-size: clamp(.7rem, 1.8vmin, .9rem);
+  font-size: clamp(.7rem, 1.4vw, .88rem);
   color: var(--text-muted);
-  margin-top: .2rem;
+  letter-spacing: .04em;
 }
+
 .hero-hint {
   display: flex;
   align-items: center;
   gap: .5rem;
-  margin-top: .8rem;
 }
 .hint-key {
   font-family: var(--font-mono);
@@ -202,29 +156,93 @@ button { font-family: inherit; background: none; border: none; cursor: pointer; 
   text-transform: uppercase;
 }
 
-/* ══ FACE 1 — IDENTITY GRID ═════════════════════════════════════ */
-#face-1 { --face-accent: rgba(41,121,242,.5); }
+/* ══════════════════════════════════════════════════════════════
+   SIDE PANEL
+   Occupies ~46% of screen, alternates left/right each section
+   ══════════════════════════════════════════════════════════════ */
+#side-panel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 46%;
+  z-index: 10;
+  pointer-events: none;
+  opacity: 0;
+}
+
+#side-panel.on-right {
+  left: 52%;
+  border-left: 1px solid var(--border);
+}
+
+#side-panel.on-left {
+  left: 2%;
+  border-right: 1px solid var(--border);
+}
+
+/* ── PANEL FACES ─────────────────────────────────────────────── */
+.panel-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 5vh 3.5vw;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.panel-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: .5rem;
+  flex-shrink: 0;
+}
+
+.panel-title {
+  font-size: clamp(2rem, 4.5vw, 3.5rem);
+  font-weight: 700;
+  letter-spacing: -.03em;
+  line-height: 1;
+  margin-bottom: 1.4rem;
+  flex-shrink: 0;
+}
+
+.panel-bio {
+  font-size: clamp(.78rem, 1.3vw, .95rem);
+  color: var(--text-muted);
+  line-height: 1.75;
+  margin-bottom: 1.2rem;
+  flex-shrink: 0;
+}
+
+/* ══ PANEL 1 — IDENTITY GRID ════════════════════════════════════ */
 .identity-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 2px;
-  width: 100%;
+  gap: 3px;
   flex: 1;
   min-height: 0;
 }
+
 .id-tile {
   background: var(--surface);
   border: 1px solid var(--border);
-  padding: clamp(6px, 1.5vmin, 10px);
+  padding: clamp(8px, 1.2vw, 14px);
   display: flex;
   flex-direction: column;
   gap: 4px;
   position: relative;
   overflow: hidden;
-  cursor: pointer;
+  cursor: default;
   transition: background .2s, border-color .2s;
 }
 .id-tile:hover { background: var(--surface-hi); border-color: var(--border-hi); }
+
 .id-tile-top {
   font-family: var(--font-mono);
   font-size: 8px;
@@ -233,11 +251,10 @@ button { font-family: inherit; background: none; border: none; cursor: pointer; 
   font-weight: 700;
 }
 .id-tile-body {
-  font-size: clamp(7px, 1.4vmin, 9px);
+  font-size: clamp(7px, 1.1vw, 9px);
   color: var(--text-muted);
   line-height: 1.45;
 }
-/* color bar per tile */
 .id-tile::before {
   content: '';
   position: absolute;
@@ -250,26 +267,23 @@ button { font-family: inherit; background: none; border: none; cursor: pointer; 
 .id-tile[data-color="green"]::before  { background: var(--green);  }
 .id-tile[data-color="red"]::before    { background: var(--red);    }
 .id-tile[data-color="white"]::before  { background: var(--accent); }
-.id-tile-center {
-  border-color: var(--border-hi);
-  background: var(--surface-hi);
-}
+.id-tile-center { border-color: var(--border-hi); background: var(--surface-hi); }
 .id-tile-center .id-tile-top { color: var(--accent); }
 
-/* ══ FACE 2 — PROJECTS ══════════════════════════════════════════ */
-#face-2 { --face-accent: rgba(232,41,58,.5); }
+/* ══ PANEL 2 — PROJECTS ══════════════════════════════════════════ */
 .project-modules {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2px;
-  width: 100%;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 3px;
   flex: 1;
   min-height: 0;
+  overflow: hidden;
 }
+
 .proj-module {
   background: var(--surface);
   border: 1px solid var(--border);
-  padding: clamp(6px, 1.5vmin, 10px);
+  padding: clamp(8px, 1.2vw, 14px);
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -293,14 +307,11 @@ button { font-family: inherit; background: none; border: none; cursor: pointer; 
   letter-spacing: .1em;
 }
 .proj-title {
-  font-size: clamp(7px, 1.6vmin, 10px);
+  font-size: clamp(8px, 1.3vw, 12px);
   font-weight: 700;
   line-height: 1.2;
 }
-.proj-tags {
-  display: flex; flex-wrap: wrap; gap: 2px;
-  margin-top: auto;
-}
+.proj-tags { display: flex; flex-wrap: wrap; gap: 2px; margin-top: auto; }
 .ptag {
   font-family: var(--font-mono);
   font-size: 6px;
@@ -317,15 +328,12 @@ button { font-family: inherit; background: none; border: none; cursor: pointer; 
   color: var(--accent);
   opacity: 0;
   transition: opacity .2s;
-  margin-top: 2px;
 }
 .proj-module:hover .proj-arrow { opacity: 1; }
 
-/* ══ FACE 3 — SKILLS ════════════════════════════════════════════ */
-#face-3 { --face-accent: rgba(45,187,107,.5); }
+/* ══ PANEL 3 — SKILLS ════════════════════════════════════════════ */
 .skill-layout {
   display: flex;
-  width: 100%;
   flex: 1;
   min-height: 0;
   gap: 0;
@@ -335,60 +343,61 @@ button { font-family: inherit; background: none; border: none; cursor: pointer; 
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 4px 6px;
+  padding: 4px 8px;
 }
 .axis-header {
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 9px;
   letter-spacing: .18em;
   text-transform: uppercase;
   font-weight: 700;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
-.skill-divider {
-  width: 1px;
-  background: var(--border);
-  align-self: stretch;
-}
-.axis-nodes { display: flex; flex-direction: column; gap: 3px; }
+.skill-divider { width: 1px; background: var(--border); align-self: stretch; }
+.axis-nodes { display: flex; flex-direction: column; gap: 4px; }
 .skill-chip {
   font-family: var(--font-mono);
-  font-size: clamp(7px, 1.4vmin, 9px);
+  font-size: clamp(8px, 1.2vw, 11px);
   color: var(--text-muted);
-  padding: 3px 6px;
+  padding: 5px 8px;
   border: 1px solid var(--border);
   background: var(--surface);
   letter-spacing: .06em;
-  cursor: pointer;
+  cursor: default;
   transition: border-color .2s, color .2s, background .2s;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.skill-chip:hover {
-  border-color: var(--border-hi);
-  color: var(--text);
-  background: var(--surface-hi);
-}
+.skill-chip:hover { border-color: var(--border-hi); color: var(--text); background: var(--surface-hi); }
 
-/* ══ FACE 4 — EXPERIENCE ════════════════════════════════════════ */
-#face-4 { --face-accent: rgba(240,107,32,.5); }
+/* ══ PANEL 4 — EXPERIENCE ════════════════════════════════════════ */
 .timeline-modules {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  width: 100%;
+  gap: 5px;
   flex: 1;
   min-height: 0;
   overflow: hidden;
+  position: relative;
+}
+.timeline-modules::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 1px;
+  background: linear-gradient(180deg, var(--accent), transparent);
+  opacity: .3;
 }
 .tm-entry {
   border: 1px solid var(--border);
-  padding: clamp(6px, 1.5vmin, 10px);
+  padding: clamp(8px, 1.2vw, 14px) clamp(8px, 1.2vw, 14px) clamp(8px, 1.2vw, 14px) 16px;
   background: var(--surface);
   position: relative;
   flex-shrink: 0;
+  transition: border-color .2s;
 }
+.tm-entry:hover { border-color: var(--border-hi); }
 .tm-entry::before {
   content: '';
   position: absolute;
@@ -399,25 +408,25 @@ button { font-family: inherit; background: none; border: none; cursor: pointer; 
 }
 .tm-date {
   font-family: var(--font-mono);
-  font-size: 7px;
+  font-size: 8px;
   letter-spacing: .12em;
   color: var(--text-dim);
-  margin-bottom: 2px;
+  margin-bottom: 3px;
 }
 .tm-role {
-  font-size: clamp(8px, 1.8vmin, 11px);
+  font-size: clamp(9px, 1.4vw, 12px);
   font-weight: 700;
   line-height: 1.2;
 }
 .tm-org {
-  font-size: clamp(7px, 1.4vmin, 9px);
+  font-size: clamp(8px, 1.1vw, 10px);
   color: var(--accent);
   margin-bottom: 3px;
 }
 .tm-desc {
-  font-size: clamp(7px, 1.3vmin, 8px);
+  font-size: clamp(7px, 1.0vw, 9px);
   color: var(--text-muted);
-  line-height: 1.45;
+  line-height: 1.5;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -434,79 +443,71 @@ button { font-family: inherit; background: none; border: none; cursor: pointer; 
   padding: 1px 4px;
 }
 
-/* ══ FACE 5 — CONTACT ═══════════════════════════════════════════ */
-#face-5 {
-  --face-accent: rgba(245,200,66,.5);
-  justify-content: center;
-  gap: .75rem;
-}
+/* ══ PANEL 5 — CONTACT ═══════════════════════════════════════════ */
 .contact-headline {
-  font-size: clamp(1.1rem, 3.5vmin, 1.7rem);
+  font-size: clamp(1.4rem, 3vw, 2.2rem);
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: -.02em;
+  margin-bottom: .5rem;
 }
 .contact-sub {
-  font-size: clamp(.65rem, 1.5vmin, .8rem);
+  font-size: clamp(.75rem, 1.2vw, .88rem);
   color: var(--text-muted);
+  margin-bottom: 1.2rem;
 }
-.contact-cta-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-}
+.contact-cta-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1.4rem; }
 .cta-link {
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 9px;
   letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--text);
   border: 1px solid var(--border-hi);
-  padding: 5px 10px;
+  padding: 6px 12px;
   cursor: pointer;
-  transition: border-color .2s, color .2s, background .2s;
   pointer-events: auto;
+  transition: border-color .2s, color .2s, background .2s;
 }
 .cta-link:hover { border-color: var(--accent); color: var(--accent); }
 .cta-link.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); }
 .cta-link.primary:hover { background: transparent; color: var(--accent); }
 
-.contact-form {
-  display: flex; flex-direction: column; gap: 5px;
-  width: 100%;
-}
-.cf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+.contact-form { display: flex; flex-direction: column; gap: 6px; }
+.cf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .cf-input {
   background: var(--surface);
   border: 1px solid var(--border);
   color: var(--text);
   font-family: var(--font-display);
-  font-size: clamp(.65rem, 1.5vmin, .8rem);
-  padding: 6px 8px;
+  font-size: clamp(.7rem, 1.2vw, .85rem);
+  padding: 7px 10px;
   outline: none;
   transition: border-color .2s;
   resize: none;
   width: 100%;
+  pointer-events: auto;
 }
 .cf-input:focus { border-color: var(--accent); }
 .cf-input::placeholder { color: var(--text-dim); }
-.cf-textarea { min-height: 55px; }
+.cf-textarea { min-height: 60px; }
 .cf-submit {
   align-self: flex-end;
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 9px;
   letter-spacing: .14em;
   text-transform: uppercase;
   background: var(--accent);
   color: var(--bg);
-  padding: 6px 14px;
+  padding: 7px 16px;
   transition: background .2s;
   cursor: pointer;
+  pointer-events: auto;
 }
 .cf-submit:hover { background: #3d7a84; }
 
 /* ══════════════════════════════════════════════════════════════
-   CHROME — FIXED HUD ELEMENTS
+   CHROME
    ══════════════════════════════════════════════════════════════ */
 #chrome {
   position: absolute; inset: 0;
@@ -514,7 +515,6 @@ button { font-family: inherit; background: none; border: none; cursor: pointer; 
   pointer-events: none;
 }
 
-/* Chapter indicator — top left */
 #chapter-indicator {
   position: absolute;
   top: 2rem; left: 2.5rem;
@@ -528,9 +528,7 @@ button { font-family: inherit; background: none; border: none; cursor: pointer; 
 }
 .ch-num { color: var(--text); }
 .ch-sep { opacity: .3; }
-.ch-total { opacity: .35; }
 
-/* Navigation labels — left edge, vertical */
 #nav-labels {
   position: absolute;
   left: 2rem;
@@ -539,27 +537,24 @@ button { font-family: inherit; background: none; border: none; cursor: pointer; 
   display: flex;
   flex-direction: column;
   gap: 10px;
-  align-items: flex-start;
 }
 .nav-label {
   font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: .14em;
   text-transform: uppercase;
-  color: rgba(255,255,255,.32);
+  color: rgba(255,255,255,.28);
   cursor: pointer;
   pointer-events: auto;
   transition: color .35s ease, font-size .35s ease, letter-spacing .35s ease;
-  text-align: left;
   line-height: 1.2;
 }
 .nav-label.active {
-  color: rgba(255,255,255,.95);
+  color: rgba(255,255,255,.9);
   font-size: 13px;
   letter-spacing: .18em;
 }
 
-/* Nav arrows — bottom center */
 #nav-prev, #nav-next {
   position: absolute;
   bottom: 2rem;
@@ -576,7 +571,6 @@ button { font-family: inherit; background: none; border: none; cursor: pointer; 
 #nav-prev svg, #nav-next svg { width: 14px; height: 14px; }
 #nav-prev:disabled, #nav-next:disabled { opacity: .2; pointer-events: none; }
 
-/* Face tag — bottom left */
 #face-tag {
   position: absolute;
   bottom: 2rem; left: 2.5rem;
@@ -589,7 +583,6 @@ button { font-family: inherit; background: none; border: none; cursor: pointer; 
   color: var(--text-muted);
 }
 
-/* Corner signature — top right */
 #corner-sig {
   position: absolute;
   top: 2rem; right: 2.5rem;
@@ -665,15 +658,11 @@ button { font-family: inherit; background: none; border: none; cursor: pointer; 
 }
 .modal-link:hover { border-color: var(--accent); color: var(--accent); }
 
-/* ══════════════════════════════════════════════════════════════
-   TRANSITION BLOCKER
-   Prevents interaction during cube rotation
-   ══════════════════════════════════════════════════════════════ */
+/* ── TRANSITION BLOCKER ──────────────────────────────────────── */
 #transition-blocker {
   position: fixed; inset: 0;
   z-index: 300;
   pointer-events: none;
-  opacity: 0;
 }
 #transition-blocker.active { pointer-events: auto; }
 
@@ -683,13 +672,15 @@ button { font-family: inherit; background: none; border: none; cursor: pointer; 
 ::-webkit-scrollbar-thumb { background: var(--accent); }
 
 /* ── RESPONSIVE ─────────────────────────────────────────────── */
-@media (max-width: 600px) {
-  :root { --face-size: min(88vw, 380px); }
+@media (max-width: 768px) {
+  #side-panel { width: 90%; }
+  #side-panel.on-right { left: 5%; border-left: none; border-top: 1px solid var(--border); top: 52%; bottom: 0; }
+  #side-panel.on-left  { left: 5%; border-right: none; border-top: 1px solid var(--border); top: 52%; bottom: 0; }
+  .panel-face { justify-content: flex-start; padding: 2vh 4vw; }
+  .panel-title { font-size: clamp(1.5rem, 5vw, 2rem); margin-bottom: .8rem; }
+  .hero-name { font-size: clamp(2.5rem, 10vw, 4rem); }
   #nav-prev { right: calc(50% + 22px); bottom: 1.2rem; }
   #nav-next { left:  calc(50% + 22px); bottom: 1.2rem; }
-  #chapter-indicator { top: 1.2rem; left: 1.2rem; }
-  #corner-sig { top: 1.2rem; right: 1.2rem; }
-  #nav-labels { left: .8rem; }
   .cf-row { grid-template-columns: 1fr; }
 }
 
