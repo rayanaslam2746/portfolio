@@ -42,11 +42,11 @@ html, body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-display);
+  cursor: default;
 }
 a { color: inherit; text-decoration: none; }
-button { font-family: inherit; background: none; border: none; }
+button { font-family: inherit; background: none; border: none; cursor: pointer; }
 
-/* ── PRELOADER ───────────────────────────────────────────────── */
 /* ── PRELOADER ───────────────────────────────────────────────── */
 #preloader {
   position: fixed; inset: 0;
@@ -221,7 +221,7 @@ button { font-family: inherit; background: none; border: none; }
   gap: 4px;
   position: relative;
   overflow: hidden;
-  
+  cursor: pointer;
   transition: background .2s, border-color .2s;
 }
 .id-tile:hover { background: var(--surface-hi); border-color: var(--border-hi); }
@@ -270,7 +270,7 @@ button { font-family: inherit; background: none; border: none; }
   background: var(--surface);
   border: 1px solid var(--border);
   padding: clamp(6px, 1.5vmin, 10px);
-  
+  cursor: pointer;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -359,7 +359,7 @@ button { font-family: inherit; background: none; border: none; }
   border: 1px solid var(--border);
   background: var(--surface);
   letter-spacing: .06em;
-  
+  cursor: pointer;
   transition: border-color .2s, color .2s, background .2s;
   white-space: nowrap;
   overflow: hidden;
@@ -463,7 +463,7 @@ button { font-family: inherit; background: none; border: none; }
   color: var(--text);
   border: 1px solid var(--border-hi);
   padding: 5px 10px;
-  
+  cursor: pointer;
   transition: border-color .2s, color .2s, background .2s;
   pointer-events: auto;
 }
@@ -501,7 +501,7 @@ button { font-family: inherit; background: none; border: none; }
   color: var(--bg);
   padding: 6px 14px;
   transition: background .2s;
-  
+  cursor: pointer;
 }
 .cf-submit:hover { background: #3d7a84; }
 
@@ -530,29 +530,33 @@ button { font-family: inherit; background: none; border: none; }
 .ch-sep { opacity: .3; }
 .ch-total { opacity: .35; }
 
-/* Progress dots — right edge, vertical */
-#progress-dots {
+/* Navigation labels — left edge, vertical */
+#nav-labels {
   position: absolute;
-  right: 2.2rem;
+  left: 2rem;
   top: 50%;
   transform: translateY(-50%);
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  align-items: center;
+  gap: 10px;
+  align-items: flex-start;
 }
-.pdot {
-  width: 5px; height: 5px;
-  border-radius: 50%;
-  border: 1px solid rgba(255,255,255,.2);
-  transition: background .3s, border-color .3s, transform .3s;
-  
+.nav-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.32);
+  cursor: pointer;
   pointer-events: auto;
+  transition: color .35s ease, font-size .35s ease, letter-spacing .35s ease;
+  text-align: left;
+  line-height: 1.2;
 }
-.pdot.active {
-  background: var(--accent);
-  border-color: var(--accent);
-  transform: scale(1.4);
+.nav-label.active {
+  color: rgba(255,255,255,.95);
+  font-size: 13px;
+  letter-spacing: .18em;
 }
 
 /* Nav arrows — bottom center */
@@ -685,7 +689,7 @@ button { font-family: inherit; background: none; border: none; }
   #nav-next { left:  calc(50% + 22px); bottom: 1.2rem; }
   #chapter-indicator { top: 1.2rem; left: 1.2rem; }
   #corner-sig { top: 1.2rem; right: 1.2rem; }
-  #progress-dots { right: .8rem; }
+  #nav-labels { left: .8rem; }
   .cf-row { grid-template-columns: 1fr; }
 }
 

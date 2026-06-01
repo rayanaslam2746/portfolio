@@ -98,10 +98,6 @@ let mouseTarget = { x: 0, y: 0 };
 let mouseSmooth = { x: 0, y: 0 };
 
 /* ══════════════════════════════════════════════════════════════
-   CURSOR
-   ══════════════════════════════════════════════════════════════ */
-
-/* ══════════════════════════════════════════════════════════════
    THREE.JS — SCENE SETUP
    ══════════════════════════════════════════════════════════════ */
 function initThree() {
@@ -127,6 +123,7 @@ function initThree() {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   buildLights();
+  buildCube();
   loadGLB();
 
   // Subtle floating particles
@@ -165,7 +162,95 @@ function buildLights() {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   GLB MODEL LOADER
+   PROCEDURAL PREMIUM CUBE
+   matte black shell + beveled edges + emissive colored stickers
+   ══════════════════════════════════════════════════════════════ */
+function buildCube() {
+  cubeGroup = new THREE.Group();
+  scene.add(cubeGroup);
+
+  const SIZE  = 0.62;
+  const GAP   = 0.03;
+  const STEP  = SIZE + GAP;
+
+  const shellMat = new THREE.MeshPhysicalMaterial({
+    color:              0x0c0c0c,
+    metalness:          0.9,
+    roughness:          0.08,
+    reflectivity:       0.95,
+    clearcoat:          1.0,
+    clearcoatRoughness: 0.04,
+  });
+
+  // Face direction → sticker color
+  const faceColors = {
+    '+x': 0xF06B20, '-x': 0xE8293A,
+    '+y': 0xE8E8E0, '-y': 0xF5C842,
+    '+z': 0x2979F2, '-z': 0x2DBB6B,
+  };
+
+  const stickerMats = {};
+  for (const [dir, col] of Object.entries(faceColors)) {
+    stickerMats[dir] = new THREE.MeshStandardMaterial({
+      color:             col,
+      emissive:          col,
+      emissiveIntensity: 0.18,
+      roughness:         0.5,
+      metalness:         0.0,
+    });
+  }
+
+  const faces3D = [
+    { dir: '+x', rot: [0,  Math.PI/2, 0],  pos: [SIZE/2 + 0.004, 0, 0] },
+    { dir: '-x', rot: [0, -Math.PI/2, 0],  pos: [-SIZE/2 - 0.004, 0, 0] },
+    { dir: '+y', rot: [-Math.PI/2, 0, 0],  pos: [0,  SIZE/2 + 0.004, 0] },
+    { dir: '-y', rot: [ Math.PI/2, 0, 0],  pos: [0, -SIZE/2 - 0.004, 0] },
+    { dir: '+z', rot: [0, 0, 0],            pos: [0, 0,  SIZE/2 + 0.004] },
+    { dir: '-z', rot: [0, Math.PI, 0],      pos: [0, 0, -SIZE/2 - 0.004] },
+  ];
+
+  for (let x = -1; x <= 1; x++) {
+    for (let y = -1; y <= 1; y++) {
+      for (let z = -1; z <= 1; z++) {
+        const piece = new THREE.Group();
+        piece.position.set(x * STEP, y * STEP, z * STEP);
+
+        // Shell
+        const geo  = new THREE.BoxGeometry(SIZE, SIZE, SIZE);
+        const mesh = new THREE.Mesh(geo, shellMat);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        piece.add(mesh);
+
+        // Stickers on exposed faces
+        const stickerGeo = new THREE.PlaneGeometry(SIZE * 0.74, SIZE * 0.74);
+        for (const f of faces3D) {
+          const exposed =
+            (f.dir === '+x' && x === 1)  ||
+            (f.dir === '-x' && x === -1) ||
+            (f.dir === '+y' && y === 1)  ||
+            (f.dir === '-y' && y === -1) ||
+            (f.dir === '+z' && z === 1)  ||
+            (f.dir === '-z' && z === -1);
+          if (!exposed) continue;
+          const sticker = new THREE.Mesh(stickerGeo, stickerMats[f.dir]);
+          sticker.position.set(...f.pos);
+          sticker.rotation.set(...f.rot);
+          sticker.userData.isSticker = true;
+          piece.add(sticker);
+        }
+
+        cubeGroup.add(piece);
+      }
+    }
+  }
+
+  // Store initial rotation target
+  cubeGroup.userData.targetEuler = [0, 0, 0];
+}
+
+/* ══════════════════════════════════════════════════════════════
+   OPTIONAL GLB OVERRIDE
    ══════════════════════════════════════════════════════════════ */
 function loadGLB() {
   const draco = new DRACOLoader();
@@ -193,9 +278,8 @@ function loadGLB() {
       }
     });
 
-    if (cubeGroup) {
-      scene.remove(cubeGroup);
-    }
+    // Swap groups
+    scene.remove(cubeGroup);
     const newGroup = new THREE.Group();
     newGroup.add(model);
     newGroup.userData.targetEuler = [0, 0, 0];
@@ -203,7 +287,7 @@ function loadGLB() {
     cubeGroup = newGroup;
     console.log('GLB loaded');
   }, undefined, err => {
-    console.warn('GLB failed:', err.message);
+    console.warn('GLB failed, using procedural cube:', err.message);
   });
 }
 
@@ -407,7 +491,7 @@ function positionFaceContent() {
 function updateChrome(idx) {
   document.getElementById('ch-current').textContent = String(idx + 1).padStart(2, '0');
   document.getElementById('face-tag-text').textContent = CONFIG.faces[idx];
-  document.querySelectorAll('.pdot').forEach((d, i) => {
+  document.querySelectorAll('.nav-label').forEach((d, i) => {
     d.classList.toggle('active', i === idx);
   });
   // Prev/next arrows
@@ -646,8 +730,8 @@ function initInput() {
     transitionToFace(currentFaceIdx + 1);
   });
 
-  // Progress dots — click to jump
-  document.querySelectorAll('.pdot').forEach(dot => {
+  // Navigation labels — click to jump
+  document.querySelectorAll('.nav-label').forEach(dot => {
     dot.addEventListener('click', () => {
       transitionToFace(parseInt(dot.dataset.idx));
     });
@@ -751,7 +835,6 @@ function runPreloader(onDone) {
    BOOT SEQUENCE
    ══════════════════════════════════════════════════════════════ */
 function boot() {
-
   runPreloader(() => {
 
     // Fade in scene
