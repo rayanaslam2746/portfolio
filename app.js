@@ -60,6 +60,15 @@ let currentState    = State.IDLE;
 let currentFaceIdx  = 0;
 let isTransitioning = false;
 
+// Continuous scroll-driven state
+let scrollFacePos      = 0;
+let scrollVelocity     = 0;
+let scrollSettleTimer  = null;
+let settleRevealTimer  = null;
+const SCROLL_SENS      = 1 / 2500;
+const SCROLL_FRICTION  = 0.85;
+const SETTLE_MS        = 400;
+
 /* ══════════════════════════════════════════════════════════════
    THREE.JS GLOBALS
    ══════════════════════════════════════════════════════════════ */
@@ -82,6 +91,11 @@ function getCubeTargetY(faceIdx) {
 
 function getPanelClass(faceIdx) {
   return faceIdx % 2 === 1 ? 'on-right' : 'on-left';
+}
+
+function nearAngle(from, to) {
+  const d = ((to - from) % (2 * Math.PI) + 3 * Math.PI) % (2 * Math.PI) - Math.PI;
+  return from + d;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -257,6 +271,16 @@ function loadGLB() {
 function renderLoop() {
   requestAnimationFrame(renderLoop);
 
+  if (currentState === 'SCROLLING' && cubeGroup) {
+    scrollVelocity *= SCROLL_FRICTION;
+    scrollFacePos  += scrollVelocity;
+    updateChrome(getNearestFace(scrollFacePos));
+    const [rx, ry, rz] = getScrollRotation(scrollFacePos);
+    cubeGroup.rotation.x = rx;
+    cubeGroup.rotation.y = ry;
+    cubeGroup.rotation.z = rz;
+  }
+
   if (currentState === State.IDLE) {
     mouseSmooth.x += (mouseTarget.x - mouseSmooth.x) * 0.04;
     mouseSmooth.y += (mouseTarget.y - mouseSmooth.y) * 0.04;
@@ -392,10 +416,137 @@ function updateChrome(idx) {
 }
 
 /* ══════════════════════════════════════════════════════════════
+   CONTINUOUS SCROLL HELPERS
+   ══════════════════════════════════════════════════════════════ */
+function getScrollRotation(facePos) {
+  const total = FACE_ROTATIONS.length;
+  const norm  = ((facePos % total) + total) % total;
+  const i     = Math.floor(norm);
+  const frac  = norm - i;
+  const from  = FACE_ROTATIONS[i].euler;
+  const to    = FACE_ROTATIONS[(i + 1) % total].euler;
+  return [
+    from[0] + (nearAngle(from[0], to[0]) - from[0]) * frac,
+    from[1] + (nearAngle(from[1], to[1]) - from[1]) * frac,
+    from[2] + (nearAngle(from[2], to[2]) - from[2]) * frac,
+  ];
+}
+
+function getNearestFace(facePos) {
+  const total = FACE_ROTATIONS.length;
+  return Math.round(((facePos % total) + total) % total) % total;
+}
+
+function beginScrolling() {
+  if (isTransitioning) return;
+  if (currentState === 'SCROLLING') return;
+
+  if (currentState === 'SETTLING') {
+    gsap.killTweensOf(cubeGroup.rotation);
+    gsap.killTweensOf(cubeGroup.position);
+    gsap.to(cubeGroup.position, { x: 0, y: 0, duration: 0.3, ease: 'power2.out' });
+    currentState = 'SCROLLING';
+    return;
+  }
+
+  if (currentState === 'REVEALING') {
+    clearTimeout(settleRevealTimer);
+    if (currentFaceIdx === 0) {
+      hideHomeOverlay();
+    } else {
+      hidePanel();
+    }
+    gsap.to(cubeGroup.position, { x: 0, y: 0, duration: 0.4, ease: 'power2.out' });
+    scrollFacePos = currentFaceIdx;
+    currentState  = 'SCROLLING';
+    return;
+  }
+
+  if (currentState !== State.IDLE) return;
+
+  if (currentFaceIdx === 0) {
+    hideHomeOverlay();
+  } else {
+    hidePanel();
+  }
+
+  gsap.killTweensOf(cubeGroup.rotation);
+  gsap.to(cubeGroup.position, { x: 0, y: 0, duration: 0.5, ease: 'power2.out' });
+
+  scrollFacePos = currentFaceIdx;
+  currentState  = 'SCROLLING';
+}
+
+function scheduleSettle() {
+  clearTimeout(scrollSettleTimer);
+  scrollSettleTimer = setTimeout(beginSettling, SETTLE_MS);
+}
+
+function beginSettling() {
+  if (currentState !== 'SCROLLING') return;
+  currentState   = 'SETTLING';
+  scrollVelocity = 0;
+
+  const nearFace = getNearestFace(scrollFacePos);
+  const target   = FACE_ROTATIONS[nearFace].euler;
+  const targetX  = getCubeTargetX(nearFace);
+  const targetY  = getCubeTargetY(nearFace);
+
+  gsap.to(cubeGroup.rotation, {
+    x: nearAngle(cubeGroup.rotation.x, target[0]),
+    y: nearAngle(cubeGroup.rotation.y, target[1]),
+    z: 0,
+    duration: 0.7,
+    ease: 'power3.out',
+  });
+
+  gsap.to(cubeGroup.position, {
+    x: targetX,
+    y: targetY,
+    duration: 0.7,
+    ease: 'power3.out',
+    onComplete: () => {
+      cubeGroup.rotation.set(...target);
+      cubeGroup.position.set(targetX, targetY, 0);
+      mouseSmooth.x = 0;
+      mouseSmooth.y = 0;
+
+      currentFaceIdx = nearFace;
+      scrollFacePos  = nearFace;
+
+      updateChrome(nearFace);
+      currentState = 'REVEALING';
+
+      if (nearFace === 0) {
+        showHomeOverlay(false);
+      } else {
+        showPanel(nearFace);
+      }
+
+      settleRevealTimer = setTimeout(() => { currentState = State.IDLE; }, 550);
+    },
+  });
+}
+
+function snapToFace(targetIdx) {
+  if (currentState === 'SCROLLING' || currentState === 'SETTLING' || currentState === 'REVEALING') {
+    clearTimeout(scrollSettleTimer);
+    clearTimeout(settleRevealTimer);
+    gsap.killTweensOf(cubeGroup.rotation);
+    gsap.killTweensOf(cubeGroup.position);
+    scrollFacePos = targetIdx;
+    currentState  = 'SCROLLING';
+    beginSettling();
+    return;
+  }
+  transitionToFace(targetIdx);
+}
+
+/* ══════════════════════════════════════════════════════════════
    STATE MACHINE — TRANSITION
    ══════════════════════════════════════════════════════════════ */
 function transitionToFace(nextIdx) {
-  if (isTransitioning) return;
+  if (isTransitioning || currentState === 'SCROLLING' || currentState === 'SETTLING' || currentState === 'REVEALING') return;
   if (nextIdx === currentFaceIdx) return;
   if (nextIdx < 0 || nextIdx >= FACE_ROTATIONS.length) return;
 
@@ -416,12 +567,6 @@ function transitionToFace(nextIdx) {
 
     gsap.to(camera.position, { z: 9.0, duration: 0.25, ease: 'power2.in' });
     gsap.to(cubeGroup.position, { x: targetX, y: targetY, duration: 1.3, ease: 'power3.inOut' });
-
-    // Rotate via the shortest angular path to the target face
-    function nearAngle(from, to) {
-      const d = ((to - from) % (2 * Math.PI) + 3 * Math.PI) % (2 * Math.PI) - Math.PI;
-      return from + d;
-    }
 
     gsap.to(cubeGroup.rotation, {
       x: nearAngle(cubeGroup.rotation.x, target[0]),
@@ -473,34 +618,35 @@ function transitionToFace(nextIdx) {
    INPUT
    ══════════════════════════════════════════════════════════════ */
 function initInput() {
-  let wheelCooldown = false;
   function onWheel(e) {
-    if (wheelCooldown || isTransitioning) return;
-    wheelCooldown = true;
-    setTimeout(() => { wheelCooldown = false; }, 950);
-    if (e.deltaY > 2 || e.deltaX > 2)       transitionToFace(currentFaceIdx + 1);
-    else if (e.deltaY < -2 || e.deltaX < -2) transitionToFace(currentFaceIdx - 1);
+    const delta = e.deltaY || e.deltaX;
+    if (Math.abs(delta) < 2) return;
+    beginScrolling();
+    if (currentState !== 'SCROLLING') return;
+    scrollVelocity += delta * SCROLL_SENS;
+    scheduleSettle();
   }
   window.addEventListener('wheel', onWheel, { passive: true });
   document.getElementById('main-canvas').addEventListener('wheel', onWheel, { passive: true });
 
   window.addEventListener('keydown', e => {
-    if (isTransitioning) return;
     if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === 'j') transitionToFace(currentFaceIdx + 1);
     else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'k') transitionToFace(currentFaceIdx - 1);
   });
 
   let touchY0 = 0;
   window.addEventListener('touchstart', e => { touchY0 = e.touches[0].clientY; }, { passive: true });
-  window.addEventListener('touchend', e => {
-    if (isTransitioning) return;
-    const dy = touchY0 - e.changedTouches[0].clientY;
-    if (Math.abs(dy) < 40) return;
-    transitionToFace(currentFaceIdx + (dy > 0 ? 1 : -1));
-  }, { passive: true });
+  window.addEventListener('touchmove', e => {
+    const dy = touchY0 - e.touches[0].clientY;
+    if (Math.abs(dy) < 3) return;
+    touchY0 = e.touches[0].clientY;
+    onWheel({ deltaY: dy, deltaX: 0 });
+    e.preventDefault();
+  }, { passive: false });
+  window.addEventListener('touchend', () => { scheduleSettle(); });
 
-document.querySelectorAll('.nav-label').forEach(dot => {
-    dot.addEventListener('click', () => transitionToFace(parseInt(dot.dataset.idx)));
+  document.querySelectorAll('.nav-label').forEach(dot => {
+    dot.addEventListener('click', () => snapToFace(parseInt(dot.dataset.idx)));
   });
 }
 

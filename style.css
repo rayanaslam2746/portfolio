@@ -443,7 +443,6 @@ button { font-family: inherit; background: none; border: none; cursor: pointer; 
   align-items: center;
   padding: 1.3rem 0;
   border-bottom: 1px solid var(--border);
-  pointer-events: auto;
   cursor: pointer;
   text-decoration: none;
   color: inherit;
