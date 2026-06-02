@@ -68,6 +68,7 @@ let settleRevealTimer  = null;
 const SCROLL_SENS      = 1 / 2500;
 const SCROLL_FRICTION  = 0.85;
 const SETTLE_MS        = 400;
+const HOME_SCALE       = 1.9;
 
 /* ══════════════════════════════════════════════════════════════
    THREE.JS GLOBALS
@@ -86,7 +87,11 @@ function getCubeTargetX(faceIdx) {
 }
 
 function getCubeTargetY(faceIdx) {
-  return faceIdx === 0 ? -0.8 : 0;
+  return faceIdx === 0 ? -2.4 : 0;
+}
+
+function getCubeTargetScale(faceIdx) {
+  return faceIdx === 0 ? HOME_SCALE : 1;
 }
 
 function getPanelClass(faceIdx) {
@@ -253,13 +258,22 @@ function loadGLB() {
       }
     });
 
+    const prevScale = cubeGroup.scale.x;
+    gsap.killTweensOf(cubeGroup.scale);
+
     scene.remove(cubeGroup);
     const newGroup = new THREE.Group();
     newGroup.add(model);
     newGroup.rotation.set(...FACE_ROTATIONS[0].euler);
     newGroup.position.set(cubeGroup.position.x, getCubeTargetY(currentFaceIdx), 0);
+    newGroup.scale.setScalar(prevScale);
     scene.add(newGroup);
     cubeGroup = newGroup;
+
+    const targetScale = getCubeTargetScale(currentFaceIdx);
+    if (Math.abs(prevScale - targetScale) > 0.01) {
+      gsap.to(cubeGroup.scale, { x: targetScale, y: targetScale, z: targetScale, duration: 0.8, ease: 'back.out(1.4)' });
+    }
   }, undefined, err => {
     console.warn('GLB not found, using procedural cube:', err.message);
   });
@@ -444,7 +458,9 @@ function beginScrolling() {
   if (currentState === 'SETTLING') {
     gsap.killTweensOf(cubeGroup.rotation);
     gsap.killTweensOf(cubeGroup.position);
+    gsap.killTweensOf(cubeGroup.scale);
     gsap.to(cubeGroup.position, { x: 0, y: 0, duration: 0.3, ease: 'power2.out' });
+    gsap.to(cubeGroup.scale, { x: 1, y: 1, z: 1, duration: 0.3, ease: 'power2.out' });
     currentState = 'SCROLLING';
     return;
   }
@@ -457,6 +473,7 @@ function beginScrolling() {
       hidePanel();
     }
     gsap.to(cubeGroup.position, { x: 0, y: 0, duration: 0.4, ease: 'power2.out' });
+    gsap.to(cubeGroup.scale, { x: 1, y: 1, z: 1, duration: 0.4, ease: 'power2.out' });
     scrollFacePos = currentFaceIdx;
     currentState  = 'SCROLLING';
     return;
@@ -472,6 +489,7 @@ function beginScrolling() {
 
   gsap.killTweensOf(cubeGroup.rotation);
   gsap.to(cubeGroup.position, { x: 0, y: 0, duration: 0.5, ease: 'power2.out' });
+  gsap.to(cubeGroup.scale, { x: 1, y: 1, z: 1, duration: 0.5, ease: 'power2.out' });
 
   scrollFacePos = currentFaceIdx;
   currentState  = 'SCROLLING';
@@ -487,10 +505,11 @@ function beginSettling() {
   currentState   = 'SETTLING';
   scrollVelocity = 0;
 
-  const nearFace = getNearestFace(scrollFacePos);
-  const target   = FACE_ROTATIONS[nearFace].euler;
-  const targetX  = getCubeTargetX(nearFace);
-  const targetY  = getCubeTargetY(nearFace);
+  const nearFace    = getNearestFace(scrollFacePos);
+  const target      = FACE_ROTATIONS[nearFace].euler;
+  const targetX     = getCubeTargetX(nearFace);
+  const targetY     = getCubeTargetY(nearFace);
+  const targetScale = getCubeTargetScale(nearFace);
 
   gsap.to(cubeGroup.rotation, {
     x: nearAngle(cubeGroup.rotation.x, target[0]),
@@ -498,6 +517,11 @@ function beginSettling() {
     z: 0,
     duration: 0.7,
     ease: 'power3.out',
+  });
+
+  gsap.to(cubeGroup.scale, {
+    x: targetScale, y: targetScale, z: targetScale,
+    duration: 0.7, ease: 'power3.out',
   });
 
   gsap.to(cubeGroup.position, {
@@ -508,6 +532,7 @@ function beginSettling() {
     onComplete: () => {
       cubeGroup.rotation.set(...target);
       cubeGroup.position.set(targetX, targetY, 0);
+      cubeGroup.scale.setScalar(targetScale);
       mouseSmooth.x = 0;
       mouseSmooth.y = 0;
 
@@ -561,12 +586,14 @@ function transitionToFace(nextIdx) {
   const onHideComplete = () => {
     currentState = State.ROTATE;
 
-    const target  = FACE_ROTATIONS[nextIdx].euler;
-    const targetX = getCubeTargetX(nextIdx);
-    const targetY = getCubeTargetY(nextIdx);
+    const target      = FACE_ROTATIONS[nextIdx].euler;
+    const targetX     = getCubeTargetX(nextIdx);
+    const targetY     = getCubeTargetY(nextIdx);
+    const targetScale = getCubeTargetScale(nextIdx);
 
     gsap.to(camera.position, { z: 9.0, duration: 0.25, ease: 'power2.in' });
     gsap.to(cubeGroup.position, { x: targetX, y: targetY, duration: 1.3, ease: 'power3.inOut' });
+    gsap.to(cubeGroup.scale, { x: targetScale, y: targetScale, z: targetScale, duration: 1.3, ease: 'power3.inOut' });
 
     gsap.to(cubeGroup.rotation, {
       x: nearAngle(cubeGroup.rotation.x, target[0]),
@@ -586,6 +613,7 @@ function transitionToFace(nextIdx) {
 
   function onRotateComplete() {
     cubeGroup.rotation.set(...FACE_ROTATIONS[nextIdx].euler);
+    cubeGroup.scale.setScalar(getCubeTargetScale(nextIdx));
     mouseSmooth.x = 0;
     mouseSmooth.y = 0;
 
@@ -741,7 +769,7 @@ function boot() {
         if (cubeGroup) {
           cubeGroup.position.y = getCubeTargetY(0);
           cubeGroup.scale.set(0, 0, 0);
-          gsap.to(cubeGroup.scale, { x: 1, y: 1, z: 1, duration: 1.1, ease: 'back.out(1.4)' });
+          gsap.to(cubeGroup.scale, { x: HOME_SCALE, y: HOME_SCALE, z: HOME_SCALE, duration: 1.1, ease: 'back.out(1.4)' });
         }
         setTimeout(() => {
           showHomeOverlay(true);
