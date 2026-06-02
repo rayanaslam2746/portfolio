@@ -393,34 +393,8 @@ function getNearestFace(facePos) {
 }
 
 function beginScrolling() {
-  if (isTransitioning) return;
   if (currentState === 'SCROLLING') return;
   if (currentState === 'HIDING') return;
-
-  if (currentState === 'SETTLING') {
-    gsap.killTweensOf(cubeGroup.rotation);
-    gsap.killTweensOf(cubeGroup.position);
-    gsap.killTweensOf(cubeGroup.scale);
-    gsap.to(cubeGroup.position, { x: 0, y: 0, duration: 0.3, ease: 'power2.out' });
-    gsap.to(cubeGroup.scale, { x: 1, y: 1, z: 1, duration: 0.3, ease: 'power2.out' });
-    currentState = 'SCROLLING';
-    return;
-  }
-
-  if (currentState === 'REVEALING') {
-    clearTimeout(settleRevealTimer);
-    if (currentFaceIdx === 0) {
-      hideHomeOverlay();
-    } else {
-      hidePanel();
-    }
-    gsap.to(cubeGroup.position, { x: 0, y: 0, duration: 0.4, ease: 'power2.out' });
-    gsap.to(cubeGroup.scale, { x: 1, y: 1, z: 1, duration: 0.4, ease: 'power2.out' });
-    scrollFacePos = currentFaceIdx;
-    currentState  = 'SCROLLING';
-    return;
-  }
-
   if (currentState !== State.IDLE) return;
 
   currentState  = 'HIDING';
@@ -495,7 +469,7 @@ function beginSettling() {
         showPanel(nearFace);
       }
 
-      settleRevealTimer = setTimeout(() => { currentState = State.IDLE; }, 550);
+      settleRevealTimer = setTimeout(() => { currentState = State.IDLE; }, 1100);
     },
   });
 }
@@ -604,6 +578,8 @@ function initInput() {
         return;
       }
     }
+    // Hold off scroll input while panels are mid-animation so they never get torn
+    if (currentState === 'SETTLING' || currentState === 'REVEALING') return;
     beginScrolling();
     if (currentState !== 'SCROLLING' && currentState !== 'HIDING') return;
     scrollVelocity += delta * SCROLL_SENS;
