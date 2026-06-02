@@ -75,8 +75,10 @@ const HOME_SCALE       = 1.9;
    ══════════════════════════════════════════════════════════════ */
 let renderer, scene, camera;
 let cubeGroup;
-let mouseTarget = { x: 0, y: 0 };
-let mouseSmooth = { x: 0, y: 0 };
+let mouseTarget  = { x: 0, y: 0 };
+let mouseSmooth  = { x: 0, y: 0 };
+let mouseClientX = 0;
+let mouseClientY = 0;
 
 let glbReady = false;
 let onGlbReady = null;
@@ -138,6 +140,8 @@ function initThree() {
   window.addEventListener('mousemove', e => {
     mouseTarget.x = (e.clientX / window.innerWidth  - 0.5) * 2;
     mouseTarget.y = (e.clientY / window.innerHeight - 0.5) * 2;
+    mouseClientX  = e.clientX;
+    mouseClientY  = e.clientY;
   });
 
   renderLoop();
@@ -592,6 +596,14 @@ function initInput() {
   function onWheel(e) {
     const delta = e.deltaY || e.deltaX;
     if (Math.abs(delta) < 2) return;
+    if (currentFaceIdx !== 0) {
+      const panel = document.getElementById('side-panel');
+      const rect  = panel.getBoundingClientRect();
+      if (mouseClientX >= rect.left && mouseClientX <= rect.right &&
+          mouseClientY >= rect.top  && mouseClientY <= rect.bottom) {
+        return;
+      }
+    }
     beginScrolling();
     if (currentState !== 'SCROLLING' && currentState !== 'HIDING') return;
     scrollVelocity += delta * SCROLL_SENS;

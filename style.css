@@ -147,9 +147,12 @@ button { font-family: inherit; background: none; border: none; cursor: pointer; 
   opacity: 0;
   pointer-events: none;
   overflow-y: auto;
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-hi) transparent;
 }
-.panel-face::-webkit-scrollbar { display: none; }
+.panel-face::-webkit-scrollbar { width: 2px; }
+.panel-face::-webkit-scrollbar-track { background: transparent; }
+.panel-face::-webkit-scrollbar-thumb { background: var(--border-hi); }
 
 /* Skills needs a touch less top padding to fit 3 groups */
 #panel-2 {
