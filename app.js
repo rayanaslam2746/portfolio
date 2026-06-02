@@ -23,13 +23,22 @@ const CONFIG = {
   faces: ['Home', 'About', 'Skills', 'Experience', 'Projects', 'Contact'],
 };
 
+const FACE_ACCENTS = [
+  '#555555',  // 0 Home       — neutral
+  '#2DBB6B',  // 1 About      — green
+  '#F06B20',  // 2 Skills     — orange
+  '#C49B00',  // 3 Experience — amber
+  '#E8293A',  // 4 Projects   — red
+  '#2979F2',  // 5 Contact    — blue
+];
+
 /* ══════════════════════════════════════════════════════════════
    FACE ROTATION MAP
    Index 0 shows the white (+y) face toward camera.
    ══════════════════════════════════════════════════════════════ */
 const FACE_ROTATIONS = [
-  { euler: [0, 0, 0],             label: 'Home'       }, // +z (blue)   → front
-  { euler: [ Math.PI / 2, 0, 0],  label: 'About'      }, // +y (white)  → front
+  { euler: [ Math.PI / 2, 0, 0],  label: 'Home'       }, // +y (white)  → front
+  { euler: [0, 0, 0],             label: 'About'      }, // +z (green)  → front
   { euler: [0,  Math.PI / 2, 0],  label: 'Skills'     }, // -x (red)    → front
   { euler: [-Math.PI / 2, 0, 0],  label: 'Experience' }, // -y (yellow) → front
   { euler: [0, -Math.PI / 2, 0],  label: 'Projects'   }, // +x (orange) → front
@@ -315,18 +324,46 @@ function showPanel(faceIdx) {
 
   panel.className = getPanelClass(faceIdx);
 
-  const xStart = faceIdx % 2 === 1 ? 60 : -60;
+  const xStart = faceIdx % 2 === 1 ? 50 : -50;
   gsap.fromTo(panel,
     { x: xStart, opacity: 0 },
-    { x: 0, opacity: 1, duration: 0.5, ease: 'power3.out' }
+    { x: 0, opacity: 1, duration: 0.55, ease: 'power3.out' }
   );
 
   if (face) {
-    const children = Array.from(face.children);
-    gsap.fromTo(children,
-      { opacity: 0, y: 14 },
-      { opacity: 1, y: 0, duration: 0.5, stagger: 0.07, ease: 'power3.out', delay: 0.12 }
+    const eyebrow   = face.querySelector('.panel-eyebrow');
+    const title     = face.querySelector('.panel-title');
+    const accentBar = face.querySelector('.panel-accent-bar');
+    const remaining = Array.from(face.children).filter(c =>
+      !c.classList.contains('panel-eyebrow') &&
+      !c.classList.contains('panel-title')   &&
+      !c.classList.contains('panel-accent-bar')
     );
+
+    if (eyebrow) {
+      gsap.fromTo(eyebrow,
+        { opacity: 0, y: 7 },
+        { opacity: 1, y: 0, duration: 0.38, ease: 'power3.out', delay: 0.1 }
+      );
+    }
+    if (title) {
+      gsap.fromTo(title,
+        { opacity: 0, y: 24 },
+        { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out', delay: 0.17 }
+      );
+    }
+    if (accentBar) {
+      gsap.fromTo(accentBar,
+        { scaleX: 0 },
+        { scaleX: 1, duration: 0.72, ease: 'power3.out', delay: 0.32 }
+      );
+    }
+    if (remaining.length) {
+      gsap.fromTo(remaining,
+        { opacity: 0, y: 16 },
+        { opacity: 1, y: 0, duration: 0.52, stagger: 0.07, ease: 'power3.out', delay: 0.38 }
+      );
+    }
   }
 }
 
@@ -343,11 +380,15 @@ function hidePanel(onComplete) {
    CHROME UPDATE
    ══════════════════════════════════════════════════════════════ */
 function updateChrome(idx) {
-  document.getElementById('face-tag-text').textContent = CONFIG.faces[idx];
+  const faceText = document.getElementById('face-tag-text');
+  const faceIdx  = document.getElementById('face-tag-idx');
+  if (faceText) faceText.textContent = CONFIG.faces[idx];
+  if (faceIdx)  faceIdx.textContent  = String(idx + 1).padStart(2, '0');
+
   document.querySelectorAll('.nav-label').forEach((d, i) => d.classList.toggle('active', i === idx));
-  document.getElementById('nav-prev').disabled = idx === 0;
-  document.getElementById('nav-next').disabled = idx === FACE_ROTATIONS.length - 1;
   gsap.to('#page-name', { opacity: idx === 0 ? 0 : 1, duration: 0.35, ease: 'power2.out' });
+
+  document.documentElement.style.setProperty('--accent-global', FACE_ACCENTS[idx]);
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -458,10 +499,7 @@ function initInput() {
     transitionToFace(currentFaceIdx + (dy > 0 ? 1 : -1));
   }, { passive: true });
 
-  document.getElementById('nav-prev').addEventListener('click', () => transitionToFace(currentFaceIdx - 1));
-  document.getElementById('nav-next').addEventListener('click', () => transitionToFace(currentFaceIdx + 1));
-
-  document.querySelectorAll('.nav-label').forEach(dot => {
+document.querySelectorAll('.nav-label').forEach(dot => {
     dot.addEventListener('click', () => transitionToFace(parseInt(dot.dataset.idx)));
   });
 }

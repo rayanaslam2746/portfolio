@@ -6,7 +6,7 @@
   <title>Rayan Aslam</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
@@ -23,105 +23,189 @@
 
   <canvas id="main-canvas"></canvas>
 
-  <!-- Home overlay — name + scroll hint -->
+  <!-- Home overlay -->
   <div id="Home-overlay">
     <div class="Home-top">
       <h1 class="Home-name">Rayan Aslam</h1>
     </div>
-    <div class="Home-bottom">
-      <div class="Home-hint">
-        <span class="hint-key">SCROLL</span>
-        <span class="hint-sep">·</span>
-        <span class="hint-label">Begin</span>
-      </div>
+    <div class="Home-hint">
+      <span class="hint-label">Scroll to Begin</span>
     </div>
   </div>
 
-  <!-- Side panel — one face active at a time -->
+  <!-- Side panel -->
   <div id="side-panel" class="on-right">
 
-    <!-- PANEL 1 — ABOUT (blue) -->
+    <!-- PANEL 1 — ABOUT -->
     <div class="panel-face" id="panel-1">
       <div class="panel-eyebrow">02 · About</div>
       <h2 class="panel-title">About</h2>
-      <p class="panel-body">I am a Computer Science and Data Science at the Rutgers New Brunswick Honors College, interested in Software, Data, and Machine Learning Engineering.</p>
+      <div class="panel-accent-bar"></div>
+      <div class="about-disciplines">
+        <span class="discipline-tag">Software Engineering</span>
+        <span class="discipline-tag">Data Engineering</span>
+        <span class="discipline-tag">Machine Learning</span>
+      </div>
+      <p class="panel-body">Studying Computer Science and Data Science at the Rutgers New Brunswick Honors College. Building systems at the intersection of software, data, and intelligence.</p>
+      <div class="about-meta">
+        <div class="about-meta-row">
+          <span class="about-meta-label">Institution</span>
+          <span class="about-meta-val">Rutgers University — New Brunswick</span>
+        </div>
+        <div class="about-meta-row">
+          <span class="about-meta-label">Program</span>
+          <span class="about-meta-val">Honors College · B.S. CS + DS</span>
+        </div>
+        <div class="about-meta-row">
+          <span class="about-meta-label">Focus</span>
+          <span class="about-meta-val">Systems · Intelligence · Infrastructure</span>
+        </div>
+      </div>
     </div>
 
-    <!-- PANEL 2 — SKILLS (orange) -->
+    <!-- PANEL 2 — SKILLS -->
     <div class="panel-face" id="panel-2">
       <div class="panel-eyebrow">03 · Skills</div>
-      <h2 class="panel-title">Skills</h2>
+      <h2 class="panel-title">Technical<br>Capabilities</h2>
+      <div class="panel-accent-bar"></div>
       <div class="skill-groups">
         <div class="skill-group">
-          <div class="skill-group-label">Languages</div>
-          <div class="skill-items">Java · Python · SQL · JavaScript · HTML/CSS · C/C++</div>
+          <div class="skill-group-header">
+            <span class="skill-group-label">Languages</span>
+            <span class="skill-group-count">06</span>
+          </div>
+          <div class="skill-chips">
+            <span class="skill-chip">Java</span>
+            <span class="skill-chip">Python</span>
+            <span class="skill-chip">SQL</span>
+            <span class="skill-chip">JavaScript</span>
+            <span class="skill-chip">HTML / CSS</span>
+            <span class="skill-chip">C / C++</span>
+          </div>
         </div>
         <div class="skill-rule"></div>
         <div class="skill-group">
-          <div class="skill-group-label">Frameworks / Libraries</div>
-          <div class="skill-items">React · Node.js · PyTorch · pandas · NumPy · Matplotlib</div>
+          <div class="skill-group-header">
+            <span class="skill-group-label">Frameworks &amp; Libraries</span>
+            <span class="skill-group-count">06</span>
+          </div>
+          <div class="skill-chips">
+            <span class="skill-chip">React</span>
+            <span class="skill-chip">Node.js</span>
+            <span class="skill-chip">PyTorch</span>
+            <span class="skill-chip">pandas</span>
+            <span class="skill-chip">NumPy</span>
+            <span class="skill-chip">Matplotlib</span>
+          </div>
         </div>
         <div class="skill-rule"></div>
         <div class="skill-group">
-          <div class="skill-group-label">Developer Tools</div>
-          <div class="skill-items">Git · GitHub · VS Code · PyCharm · IntelliJ</div>
+          <div class="skill-group-header">
+            <span class="skill-group-label">Developer Tools</span>
+            <span class="skill-group-count">05</span>
+          </div>
+          <div class="skill-chips">
+            <span class="skill-chip">Git</span>
+            <span class="skill-chip">GitHub</span>
+            <span class="skill-chip">VS Code</span>
+            <span class="skill-chip">PyCharm</span>
+            <span class="skill-chip">IntelliJ</span>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- PANEL 3 — EXPERIENCE (green) -->
+    <!-- PANEL 3 — EXPERIENCE -->
     <div class="panel-face" id="panel-3">
       <div class="panel-eyebrow">04 · Experience</div>
-      <h2 class="panel-title">Experience</h2>
+      <h2 class="panel-title">Work<br>Record</h2>
+      <div class="panel-accent-bar"></div>
       <div class="entry-list">
         <div class="entry-item">
-          <span class="entry-idx">01</span>
-          <p class="entry-body">Filler paragraph Filler paragraphFiller paragraphFiller paragraph Filler paragraph  Filler paragraph Filler paragraphFiller paragraphFiller paragraph Filler paragraphFiller paragraph</p>
+          <div class="entry-header">
+            <span class="entry-idx">01</span>
+            <div class="entry-meta">
+              <span class="entry-role">Role Title</span>
+              <span class="entry-company">Organization Name</span>
+            </div>
+            <span class="entry-date">2024</span>
+          </div>
+          <p class="entry-body">Position description to be added. Technical contributions, responsibilities, and outcomes will be documented here with specific details and measurable impact.</p>
         </div>
         <div class="entry-item">
-          <span class="entry-idx">02</span>
-          <p class="entry-body">Filler paragraph Filler paragraphFiller paragraphFiller paragraph Filler paragraph  Filler paragraph Filler paragraphFiller paragraphFiller paragraph Filler paragraphFiller paragraph</p>
+          <div class="entry-header">
+            <span class="entry-idx">02</span>
+            <div class="entry-meta">
+              <span class="entry-role">Role Title</span>
+              <span class="entry-company">Organization Name</span>
+            </div>
+            <span class="entry-date">2023</span>
+          </div>
+          <p class="entry-body">Position description to be added. Technical contributions, responsibilities, and outcomes will be documented here with specific details and measurable impact.</p>
         </div>
       </div>
     </div>
 
-    <!-- PANEL 4 — PROJECTS (red) -->
+    <!-- PANEL 4 — PROJECTS -->
     <div class="panel-face" id="panel-4">
       <div class="panel-eyebrow">05 · Projects</div>
-      <h2 class="panel-title">Projects</h2>
+      <h2 class="panel-title">Selected<br>Work</h2>
+      <div class="panel-accent-bar"></div>
       <div class="entry-list">
         <div class="entry-item">
-          <span class="entry-idx">01</span>
-          <p class="entry-body">Filler paragraph Filler paragraphFiller paragraphFiller paragraph Filler paragraph  Filler paragraph Filler paragraphFiller paragraphFiller paragraph Filler paragraphFiller paragraph</p>
+          <div class="entry-header">
+            <span class="entry-idx">01</span>
+            <div class="entry-meta">
+              <span class="entry-role project-name">Project Name</span>
+              <div class="project-tags">
+                <span class="project-tag">Python</span>
+                <span class="project-tag">ML</span>
+              </div>
+            </div>
+            <span class="project-status">Active</span>
+          </div>
+          <p class="entry-body">Project description to be added. Technical summary including purpose, methodology, and key outcomes or findings.</p>
         </div>
         <div class="entry-item">
-          <span class="entry-idx">02</span>
-          <p class="entry-body">Filler paragraph Filler paragraphFiller paragraphFiller paragraph Filler paragraph  Filler paragraph Filler paragraphFiller paragraphFiller paragraph Filler paragraphFiller paragraph</p>
+          <div class="entry-header">
+            <span class="entry-idx">02</span>
+            <div class="entry-meta">
+              <span class="entry-role project-name">Project Name</span>
+              <div class="project-tags">
+                <span class="project-tag">React</span>
+                <span class="project-tag">Node.js</span>
+              </div>
+            </div>
+            <span class="project-status">Complete</span>
+          </div>
+          <p class="entry-body">Project description to be added. Technical summary including purpose, methodology, and key outcomes or findings.</p>
         </div>
       </div>
     </div>
 
-    <!-- PANEL 5 — CONTACT (yellow) -->
+    <!-- PANEL 5 — CONTACT -->
     <div class="panel-face" id="panel-5">
       <div class="panel-eyebrow">06 · Contact</div>
-      <h2 class="panel-title">Contact</h2>
+      <h2 class="panel-title">Get in<br>Touch</h2>
+      <div class="panel-accent-bar"></div>
+      <p class="contact-intro">Open to internships, research collaborations, and interesting engineering projects.</p>
       <div class="contact-links">
         <a href="mailto:rayanrumi1@gmail.com" class="contact-link-row">
           <span class="contact-link-tag">Email</span>
           <span class="contact-link-val">rayanrumi1@gmail.com</span>
           <span class="contact-link-arrow">→</span>
         </a>
-        <a href="#" class="contact-link-row" target="_blank" rel="noopener noreferrer">
+        <a href="https://linkedin.com/in/rayan-aslam" class="contact-link-row" target="_blank" rel="noopener noreferrer">
           <span class="contact-link-tag">LinkedIn</span>
           <span class="contact-link-val">linkedin.com/in/rayan-aslam</span>
           <span class="contact-link-arrow">→</span>
         </a>
-        <a href="#" class="contact-link-row" target="_blank" rel="noopener noreferrer">
+        <a href="https://github.com/rayan-aslam" class="contact-link-row" target="_blank" rel="noopener noreferrer">
           <span class="contact-link-tag">GitHub</span>
           <span class="contact-link-val">github.com/rayan-aslam</span>
           <span class="contact-link-arrow">→</span>
         </a>
-        <a href="#" class="contact-link-row" target="_blank" rel="noopener noreferrer">
+        <a href="#" class="contact-link-row">
           <span class="contact-link-tag">Resume</span>
           <span class="contact-link-val">Download PDF</span>
           <span class="contact-link-arrow">↓</span>
@@ -142,13 +226,13 @@
       <div class="nav-label" data-idx="4">Projects</div>
       <div class="nav-label" data-idx="5">Contact</div>
     </div>
-    <button class="nav-arrow" id="nav-prev" aria-label="Previous">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="15,18 9,12 15,6"/></svg>
-    </button>
-    <button class="nav-arrow" id="nav-next" aria-label="Next">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="9,6 15,12 9,18"/></svg>
-    </button>
-    <div id="face-tag"><span class="face-tag-label" id="face-tag-text">Home</span></div>
+    <div id="face-tag">
+      <span class="face-tag-idx" id="face-tag-idx">01</span>
+      <span class="face-tag-sep">&thinsp;/&thinsp;</span>
+      <span class="face-tag-total">06</span>
+      <span class="face-tag-divider">&ensp;—&ensp;</span>
+      <span class="face-tag-label" id="face-tag-text">Home</span>
+    </div>
     <div id="corner-sig">RA</div>
   </div>
 
