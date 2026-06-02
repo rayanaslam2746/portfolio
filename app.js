@@ -340,7 +340,14 @@ function hidePanel(onComplete) {
   const xOut  = panel.classList.contains('on-right') ? 60 : -60;
   gsap.to(panel, {
     x: xOut, opacity: 0, duration: 0.28, ease: 'power2.in',
-    onComplete: () => { gsap.set(panel, { x: 0 }); onComplete?.(); }
+    onComplete: () => {
+      gsap.set(panel, { x: 0 });
+      document.querySelectorAll('.panel-face').forEach(f => {
+        f.style.opacity       = '0';
+        f.style.pointerEvents = 'none';
+      });
+      onComplete?.();
+    }
   });
 }
 
