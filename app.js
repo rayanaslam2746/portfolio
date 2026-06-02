@@ -454,6 +454,7 @@ function getNearestFace(facePos) {
 function beginScrolling() {
   if (isTransitioning) return;
   if (currentState === 'SCROLLING') return;
+  if (currentState === 'HIDING') return;
 
   if (currentState === 'SETTLING') {
     gsap.killTweensOf(cubeGroup.rotation);
@@ -481,18 +482,23 @@ function beginScrolling() {
 
   if (currentState !== State.IDLE) return;
 
-  if (currentFaceIdx === 0) {
-    hideHomeOverlay();
-  } else {
-    hidePanel();
-  }
-
-  gsap.killTweensOf(cubeGroup.rotation);
-  gsap.to(cubeGroup.position, { x: 0, y: 0, duration: 0.5, ease: 'power2.out' });
-  gsap.to(cubeGroup.scale, { x: 1, y: 1, z: 1, duration: 0.5, ease: 'power2.out' });
-
+  currentState  = 'HIDING';
   scrollFacePos = currentFaceIdx;
-  currentState  = 'SCROLLING';
+
+  const onHideComplete = () => {
+    if (currentState !== 'HIDING') return;
+    gsap.killTweensOf(cubeGroup.rotation);
+    gsap.to(cubeGroup.position, { x: 0, y: 0, duration: 0.4, ease: 'power2.out' });
+    gsap.to(cubeGroup.scale, { x: 1, y: 1, z: 1, duration: 0.4, ease: 'power2.out' });
+    currentState = 'SCROLLING';
+    scheduleSettle();
+  };
+
+  if (currentFaceIdx === 0) {
+    hideHomeOverlay(onHideComplete);
+  } else {
+    hidePanel(onHideComplete);
+  }
 }
 
 function scheduleSettle() {
@@ -650,9 +656,9 @@ function initInput() {
     const delta = e.deltaY || e.deltaX;
     if (Math.abs(delta) < 2) return;
     beginScrolling();
-    if (currentState !== 'SCROLLING') return;
+    if (currentState !== 'SCROLLING' && currentState !== 'HIDING') return;
     scrollVelocity += delta * SCROLL_SENS;
-    scheduleSettle();
+    if (currentState === 'SCROLLING') scheduleSettle();
   }
   window.addEventListener('wheel', onWheel, { passive: true });
   document.getElementById('main-canvas').addEventListener('wheel', onWheel, { passive: true });
