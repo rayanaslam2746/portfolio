@@ -78,6 +78,9 @@ let cubeGroup;
 let mouseTarget = { x: 0, y: 0 };
 let mouseSmooth = { x: 0, y: 0 };
 
+let glbReady = false;
+let onGlbReady = null;
+
 /* ══════════════════════════════════════════════════════════════
    POSITION HELPERS
    ══════════════════════════════════════════════════════════════ */
@@ -124,7 +127,6 @@ function initThree() {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   buildLights();
-  buildCube();
   loadGLB();
 
   window.addEventListener('resize', () => {
@@ -160,86 +162,20 @@ function buildLights() {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   PROCEDURAL CUBE
-   ══════════════════════════════════════════════════════════════ */
-function buildCube() {
-  cubeGroup = new THREE.Group();
-  scene.add(cubeGroup);
-
-  const SIZE = 0.62;
-  const GAP  = 0.03;
-  const STEP = SIZE + GAP;
-
-  const shellMat = new THREE.MeshPhysicalMaterial({
-    color: 0x111111, metalness: 0.85, roughness: 0.1,
-    reflectivity: 0.95, clearcoat: 1.0, clearcoatRoughness: 0.05,
-  });
-
-  const faceColors = {
-    '+x': 0xF06B20, '-x': 0xE8293A,
-    '+y': 0xE8E8E0, '-y': 0xF5C842,
-    '+z': 0x2979F2, '-z': 0x2DBB6B,
-  };
-
-  const stickerMats = {};
-  for (const [dir, col] of Object.entries(faceColors)) {
-    stickerMats[dir] = new THREE.MeshStandardMaterial({
-      color: col, emissive: col, emissiveIntensity: 0.12,
-      roughness: 0.45, metalness: 0.0,
-    });
-  }
-
-  const faces3D = [
-    { dir: '+x', rot: [0,  Math.PI/2, 0], pos: [SIZE/2 + 0.004, 0, 0] },
-    { dir: '-x', rot: [0, -Math.PI/2, 0], pos: [-SIZE/2 - 0.004, 0, 0] },
-    { dir: '+y', rot: [-Math.PI/2, 0, 0], pos: [0,  SIZE/2 + 0.004, 0] },
-    { dir: '-y', rot: [ Math.PI/2, 0, 0], pos: [0, -SIZE/2 - 0.004, 0] },
-    { dir: '+z', rot: [0, 0, 0],           pos: [0, 0,  SIZE/2 + 0.004] },
-    { dir: '-z', rot: [0, Math.PI, 0],     pos: [0, 0, -SIZE/2 - 0.004] },
-  ];
-
-  for (let x = -1; x <= 1; x++) {
-    for (let y = -1; y <= 1; y++) {
-      for (let z = -1; z <= 1; z++) {
-        const piece = new THREE.Group();
-        piece.position.set(x * STEP, y * STEP, z * STEP);
-
-        const geo  = new THREE.BoxGeometry(SIZE, SIZE, SIZE);
-        const mesh = new THREE.Mesh(geo, shellMat);
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-        piece.add(mesh);
-
-        const stickerGeo = new THREE.PlaneGeometry(SIZE * 0.74, SIZE * 0.74);
-        for (const f of faces3D) {
-          const exposed =
-            (f.dir === '+x' && x === 1)  || (f.dir === '-x' && x === -1) ||
-            (f.dir === '+y' && y === 1)  || (f.dir === '-y' && y === -1) ||
-            (f.dir === '+z' && z === 1)  || (f.dir === '-z' && z === -1);
-          if (!exposed) continue;
-          const sticker = new THREE.Mesh(stickerGeo, stickerMats[f.dir]);
-          sticker.position.set(...f.pos);
-          sticker.rotation.set(...f.rot);
-          sticker.userData.isSticker = true;
-          piece.add(sticker);
-        }
-
-        cubeGroup.add(piece);
-      }
-    }
-  }
-
-  cubeGroup.rotation.set(...FACE_ROTATIONS[0].euler);
-}
-
-/* ══════════════════════════════════════════════════════════════
-   GLB OVERRIDE
+   GLB LOADER
    ══════════════════════════════════════════════════════════════ */
 function loadGLB() {
   const draco = new DRACOLoader();
   draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/');
   const loader = new GLTFLoader();
   loader.setDRACOLoader(draco);
+
+  const signalReady = () => {
+    glbReady = true;
+    const cb = onGlbReady;
+    onGlbReady = null;
+    cb?.();
+  };
 
   loader.load('./assets/rubiks_cube.glb', gltf => {
     const model = gltf.scene;
@@ -258,24 +194,18 @@ function loadGLB() {
       }
     });
 
-    const prevScale = cubeGroup.scale.x;
-    gsap.killTweensOf(cubeGroup.scale);
-
-    scene.remove(cubeGroup);
     const newGroup = new THREE.Group();
     newGroup.add(model);
     newGroup.rotation.set(...FACE_ROTATIONS[0].euler);
-    newGroup.position.set(cubeGroup.position.x, getCubeTargetY(currentFaceIdx), 0);
-    newGroup.scale.setScalar(prevScale);
+    newGroup.position.set(0, getCubeTargetY(0), 0);
+    newGroup.scale.setScalar(0);
     scene.add(newGroup);
     cubeGroup = newGroup;
 
-    const targetScale = getCubeTargetScale(currentFaceIdx);
-    if (Math.abs(prevScale - targetScale) > 0.01) {
-      gsap.to(cubeGroup.scale, { x: targetScale, y: targetScale, z: targetScale, duration: 0.8, ease: 'back.out(1.4)' });
-    }
+    signalReady();
   }, undefined, err => {
-    console.warn('GLB not found, using procedural cube:', err.message);
+    console.warn('GLB failed to load:', err.message);
+    signalReady();
   });
 }
 
@@ -728,12 +658,7 @@ function runPreloader(onDone) {
     ctx.restore();
   }
 
-  function finish() {
-    if (done) return;
-    done = true;
-    clearInterval(dotTimer);
-    bar.style.width  = '100%';
-    lbl.textContent  = 'Ready';
+  function fadeOut() {
     setTimeout(() => {
       gsap.to('#preloader', {
         opacity: 0, duration: 0.65, ease: 'power2.inOut',
@@ -742,10 +667,23 @@ function runPreloader(onDone) {
           onDone();
         }
       });
-    }, 180);
+    }, 300);
   }
 
-  const START = Date.now(), DUR = 1800;
+  function finish() {
+    if (done) return;
+    done = true;
+    clearInterval(dotTimer);
+    bar.style.width = '100%';
+    lbl.textContent = 'Ready';
+    if (glbReady) {
+      fadeOut();
+    } else {
+      onGlbReady = fadeOut;
+    }
+  }
+
+  const START = Date.now(), DUR = 2200;
   const timer = setInterval(() => {
     prog = Math.min((Date.now() - START) / DUR, 1);
     bar.style.width = (prog * 100) + '%';
@@ -753,7 +691,17 @@ function runPreloader(onDone) {
     if (prog >= 1) { clearInterval(timer); finish(); }
   }, 16);
 
-  setTimeout(finish, 2600);
+  // Safety: if GLB never loads, unblock after 12s
+  setTimeout(() => {
+    if (!glbReady) {
+      glbReady = true;
+      const cb = onGlbReady;
+      onGlbReady = null;
+      cb?.();
+    }
+    finish();
+  }, 12000);
+
   canvas.parentElement.addEventListener('click', finish, { once: true });
   document.addEventListener('keydown', finish, { once: true });
 }
@@ -762,27 +710,24 @@ function runPreloader(onDone) {
    BOOT
    ══════════════════════════════════════════════════════════════ */
 function boot() {
+  // Start loading Three.js + GLB immediately, in parallel with the preloader
+  initThree();
+
   runPreloader(() => {
     gsap.to('#scene', { opacity: 1, duration: 0.7, ease: 'power2.out' });
 
-    initThree();
     initInput();
+    updateChrome(0);
 
-    requestAnimationFrame(() => {
-      updateChrome(0);
-
-      setTimeout(() => {
-        if (cubeGroup) {
-          cubeGroup.position.y = getCubeTargetY(0);
-          cubeGroup.scale.set(0, 0, 0);
-          gsap.to(cubeGroup.scale, { x: HOME_SCALE, y: HOME_SCALE, z: HOME_SCALE, duration: 1.1, ease: 'back.out(1.4)' });
-        }
-        setTimeout(() => {
-          showHomeOverlay(true);
-          currentState = State.IDLE;
-        }, 280);
-      }, 100);
-    });
+    if (cubeGroup) {
+      cubeGroup.position.y = getCubeTargetY(0);
+      cubeGroup.scale.set(0, 0, 0);
+      gsap.to(cubeGroup.scale, { x: HOME_SCALE, y: HOME_SCALE, z: HOME_SCALE, duration: 1.1, ease: 'back.out(1.4)' });
+    }
+    setTimeout(() => {
+      showHomeOverlay(true);
+      currentState = State.IDLE;
+    }, 280);
   });
 }
 
